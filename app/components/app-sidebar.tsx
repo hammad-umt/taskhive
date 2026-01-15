@@ -18,7 +18,7 @@ import LogoutButton from "./logout-button"
 const mainItems = [
   {
     title: "Home",
-    url: "/",
+    url: "/admin/dashboard",
     icon: Home,
   },
   {
@@ -41,7 +41,7 @@ const managementItems = [
   },
   {
     title: "Tasks",
-    url: "/tasks",
+    url: "/admin/tasks",
     icon: CheckSquare,
   },
 ]
@@ -54,12 +54,12 @@ const actionItems = [
   },
   {
     title: "Add Task",
-    url: "/tasks/new",
+    url: "/admin/tasks/new",
     icon: Plus,
   },
   {
     title: "Assign Task",
-    url: "/tasks/assign",
+    url: "/admin/tasks/assign",
     icon: CheckSquare,
   },
 ]
@@ -67,7 +67,7 @@ const actionItems = [
 const settingsItems = [
   {
     title: "Search",
-    url: "/search",
+    url: "/admin/search",
     icon: Search,
   },
   {
