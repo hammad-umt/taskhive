@@ -106,28 +106,28 @@ export default function InboxPage() {
   const unreadCount = messages.filter((msg) => !msg.read).length;
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+    <div className="p-8 max-w-5xl mx-auto">
       <Card className="overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Inbox</h1>
-              <p className="text-blue-100 text-sm md:text-base mt-1">{unreadCount} unread messages</p>
+              <h1 className="text-3xl font-bold">Inbox</h1>
+              <p className="text-blue-100 mt-1">{unreadCount} unread messages</p>
             </div>
-            <div className="bg-white text-blue-600 rounded-full px-3 md:px-4 py-2 font-bold text-lg flex-shrink-0">
+            <div className="bg-white text-blue-600 rounded-full px-4 py-2 font-bold text-lg">
               {messages.length}
             </div>
           </div>
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <Input
               placeholder="Search messages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white text-gray-900 placeholder-gray-500 text-sm md:text-base"
+              className="pl-10 bg-white text-gray-900 placeholder-gray-500"
             />
           </div>
         </div>
@@ -142,43 +142,42 @@ export default function InboxPage() {
                   setSelectedMessage(message.id);
                   markAsRead(message.id);
                 }}
-                className={`p-3 md:p-4 cursor-pointer transition-all hover:bg-gray-50 ${
+                className={`p-4 cursor-pointer transition-all hover:bg-gray-50 ${
                   !message.read ? 'bg-blue-50 border-l-4 border-blue-600' : 'bg-white'
                 } ${selectedMessage === message.id ? 'ring-2 ring-blue-400' : ''}`}
               >
-                <div className="flex items-start md:items-center gap-3 md:gap-4">
+                <div className="flex items-center gap-4">
                   {/* Avatar */}
                   <div className="flex-shrink-0">
-                    <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center font-bold text-xs md:text-sm">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center font-bold">
                       {message.avatar}
                     </div>
                   </div>
 
                   {/* Content */}
                   <div className="flex-grow min-w-0">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 mb-1">
-                      <h3 className={`font-bold text-gray-900 text-sm md:text-base ${!message.read ? 'text-lg' : ''}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className={`font-bold text-gray-900 ${!message.read ? 'text-lg' : ''}`}>
                         {message.sender}
                       </h3>
-                      <span className="text-xs text-gray-500 flex-shrink-0">{message.timestamp}</span>
+                      <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{message.timestamp}</span>
                     </div>
-                    <p className={`text-xs md:text-sm ${!message.read ? 'font-bold text-gray-900' : 'text-gray-600'}`}>
+                    <p className={`text-sm ${!message.read ? 'font-bold text-gray-900' : 'text-gray-600'}`}>
                       {message.subject}
                     </p>
                     <p className="text-xs text-gray-500 truncate mt-1">{message.preview}</p>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleStar(message.id);
                       }}
-                      className={`p-1.5 md:p-2 rounded hover:bg-gray-200 transition-all ${
+                      className={`p-2 rounded hover:bg-gray-200 transition-all ${
                         message.starred ? 'text-yellow-500' : 'text-gray-400'
                       }`}
-                      title="Star message"
                     >
                       <Star className="h-4 w-4 fill-current" />
                     </button>
@@ -187,8 +186,7 @@ export default function InboxPage() {
                         e.stopPropagation();
                         deleteMessage(message.id);
                       }}
-                      className="p-1.5 md:p-2 rounded hover:bg-red-100 text-gray-400 hover:text-red-600 transition-all"
-                      title="Delete message"
+                      className="p-2 rounded hover:bg-red-100 text-gray-400 hover:text-red-600 transition-all"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -198,13 +196,13 @@ export default function InboxPage() {
             ))
           ) : (
             <div className="p-8 text-center text-gray-500">
-              <p className="text-base md:text-lg">No messages found</p>
+              <p className="text-lg">No messages found</p>
             </div>
           )}
         </div>
 
         {/* Footer Stats */}
-        <div className="bg-gray-50 p-3 md:p-4 flex flex-col sm:flex-row justify-between gap-2 text-xs md:text-sm text-gray-600 border-t">
+        <div className="bg-gray-50 p-4 flex justify-between text-sm text-gray-600 border-t">
           <span>Total: {messages.length} messages</span>
           <span>Unread: {unreadCount} messages</span>
           <span>Starred: {messages.filter((m) => m.starred).length} messages</span>

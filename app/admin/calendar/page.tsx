@@ -52,27 +52,27 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
-      <Card className="p-4 md:p-6">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-4 md:p-6 mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-4">Calendar Demo</h1>
+    <div className="p-8 max-w-4xl mx-auto">
+      <Card className="p-6">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold mb-4">Calendar Demo</h1>
 
           {/* Month Navigation */}
-          <div className="flex items-center justify-between mb-6 gap-2">
+          <div className="flex items-center justify-between mb-6">
             <Button
               variant="outline"
               size="icon"
               onClick={previousMonth}
-              className="bg-white text-blue-600 hover:bg-gray-100 h-8 w-8 md:h-10 md:w-10"
+              className="bg-white text-blue-600 hover:bg-gray-100"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <h2 className="text-lg md:text-2xl font-bold text-center flex-1 text-xs sm:text-base">{monthName}</h2>
+            <h2 className="text-2xl font-bold">{monthName}</h2>
             <Button
               variant="outline"
               size="icon"
               onClick={nextMonth}
-              className="bg-white text-blue-600 hover:bg-gray-100 h-8 w-8 md:h-10 md:w-10"
+              className="bg-white text-blue-600 hover:bg-gray-100"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -80,19 +80,19 @@ export default function CalendarPage() {
         </div>
 
         {/* Week Days Header */}
-        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">
+        <div className="grid grid-cols-7 gap-2 mb-2">
           {weekDays.map((day) => (
-            <div key={day} className="text-center font-bold text-gray-600 py-2 text-xs md:text-sm">
+            <div key={day} className="text-center font-bold text-gray-600 py-2">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1 md:gap-2">
+        <div className="grid grid-cols-7 gap-2">
           {/* Empty cells for days before month starts */}
           {emptyDays.map((_, index) => (
-            <div key={`empty-${index}`} className="aspect-square bg-gray-50 rounded text-xs" />
+            <div key={`empty-${index}`} className="aspect-square bg-gray-50 rounded" />
           ))}
 
           {/* Calendar days */}
@@ -103,7 +103,7 @@ export default function CalendarPage() {
             return (
               <div
                 key={day}
-                className={`aspect-square rounded-lg p-1 md:p-2 border-2 cursor-pointer transition-all hover:shadow-lg ${
+                className={`aspect-square rounded-lg p-2 border-2 cursor-pointer transition-all hover:shadow-lg ${
                   isToday
                     ? 'border-blue-500 bg-blue-50'
                     : event
@@ -112,13 +112,11 @@ export default function CalendarPage() {
                 }`}
               >
                 <div className="flex flex-col h-full">
-                  <span className={`text-xs md:text-sm font-bold ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
+                  <span className={`text-sm font-bold ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
                     {day}
                   </span>
                   {event && (
-                    <p className="text-xs font-semibold text-gray-700 mt-0.5 md:mt-1 line-clamp-2 leading-tight">
-                      {event.title}
-                    </p>
+                    <p className="text-xs font-semibold text-gray-700 mt-1 line-clamp-2">{event.title}</p>
                   )}
                 </div>
               </div>
@@ -128,12 +126,12 @@ export default function CalendarPage() {
 
         {/* Legend */}
         <div className="mt-6 pt-6 border-t">
-          <h3 className="font-bold mb-3 text-sm md:text-base">Events</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+          <h3 className="font-bold mb-3">Events</h3>
+          <div className="grid grid-cols-2 gap-3">
             {events.map((event, idx) => (
               <div key={idx} className="flex items-center gap-2">
-                <div className={`w-3 h-3 md:w-4 md:h-4 rounded ${event.color}`} />
-                <span className="text-xs md:text-sm">{event.title}</span>
+                <div className={`w-4 h-4 rounded ${event.color}`} />
+                <span className="text-sm">{event.title}</span>
               </div>
             ))}
           </div>

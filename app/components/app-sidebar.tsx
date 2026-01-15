@@ -79,18 +79,18 @@ const settingsItems = [
 
 export function AppSidebar() {
   return (
-    <Sidebar className="w-full">
+    <Sidebar>
       <SidebarContent className="flex flex-col h-full">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs md:text-sm">Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-xs md:text-sm">
+                  <SidebarMenuButton asChild>
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -102,14 +102,14 @@ export function AppSidebar() {
 
         {/* Management Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs md:text-sm">Management</SidebarGroupLabel>
+          <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {managementItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-xs md:text-sm">
+                  <SidebarMenuButton asChild>
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -121,14 +121,14 @@ export function AppSidebar() {
 
         {/* Quick Actions */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs md:text-sm">Quick Actions</SidebarGroupLabel>
+          <SidebarGroupLabel>Quick Actions</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {actionItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-xs md:text-sm">
+                  <SidebarMenuButton asChild>
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -140,14 +140,14 @@ export function AppSidebar() {
 
         {/* Settings */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs md:text-sm">Preferences</SidebarGroupLabel>
+          <SidebarGroupLabel>Preferences</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-xs md:text-sm">
+                  <SidebarMenuButton asChild>
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -162,7 +162,7 @@ export function AppSidebar() {
 
         {/* Logout Button */}
         <SidebarGroup>
-          <SidebarMenuButton asChild className="w-full">
+          <SidebarMenuButton asChild>
             <LogoutButton />
           </SidebarMenuButton>
         </SidebarGroup>
