@@ -1,0 +1,34 @@
+'use client';
+
+import ProtectedPage from '@/app/components/ProtectedPage';
+import Header from './components/header';
+import { AppSidebar } from '@/app/components/app-sidebar';
+import {
+  SidebarProvider,
+  SidebarInset,
+} from '@/components/ui/sidebar';
+
+// export const metadata = {
+//   title: 'Admin Dashboard',
+//   description: 'Professional Admin Dashboard',
+// };
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ProtectedPage>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <Header />
+          <main className="flex-1 overflow-auto p-6">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </ProtectedPage>
+  );
+}
