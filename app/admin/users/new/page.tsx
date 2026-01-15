@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Loader2, Eye, EyeOff, Check, X } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -31,6 +33,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export default function AddUserPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -145,27 +148,52 @@ export default function AddUserPage() {
     e.preventDefault();
 
     if (!validateForm()) {
+      toast.error('Validation failed', {
+        description: 'Please fill in all required fields correctly',
+      });
       return;
     }
 
     setIsLoading(true);
+    const loadingToast = toast.loading('Creating user...');
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setShowSuccessDialog(true);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-        role: '',
-        department: '',
-        status: 'Active',
+    fetch('/api/users/adduser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setIsLoading(false);
+        toast.dismiss(loadingToast);
+        toast.success('User created successfully', {
+          description: `${formData.firstName} ${formData.lastName} has been added to the system`,
+        });
+        setShowSuccessDialog(true);
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+          role: '',
+          department: '',
+          status: 'Active',
+        });
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.dismiss(loadingToast);
+        toast.error('Failed to create user', {
+          description: err.message || 'An error occurred',
+        });
       });
-    }, 1500);
   };
 
   const handleReset = () => {
@@ -181,12 +209,13 @@ export default function AddUserPage() {
       status: 'Active',
     });
     setErrors({});
+    toast.info('Form reset', { description: 'All fields have been cleared' });
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <div className="px-6 py-4">
+      <div className="px-4 md:px-6 py-4">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/admin/users">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -196,12 +225,14 @@ export default function AddUserPage() {
       </div>
 
       {/* Main Content - Centered */}
-      <div className="flex-1 flex items-center justify-center px-4 py-8">
+      <div className="flex-1 flex items-center justify-center px-4 py-6 md:py-8">
         <div className="w-full max-w-2xl">
           {/* Title Section */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold tracking-tight">Add New User</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+              Add New User
+            </h1>
+            <p className="text-muted-foreground text-sm md:text-base mt-2">
               Create a new user account and assign a role
             </p>
           </div>
@@ -209,8 +240,8 @@ export default function AddUserPage() {
           {/* Form Card */}
           <Card>
             <CardHeader>
-              <CardTitle>User Information</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg md:text-xl">User Information</CardTitle>
+              <CardDescription className="text-xs md:text-sm">
                 Fill in the details below to create a new user account
               </CardDescription>
             </CardHeader>
@@ -220,40 +251,50 @@ export default function AddUserPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* First Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name *</Label>
+                    <Label htmlFor="firstName" className="text-sm">
+                      First Name *
+                    </Label>
                     <Input
                       id="firstName"
                       name="firstName"
                       placeholder="John"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className={errors.firstName ? 'border-destructive' : ''}
+                      className={`text-sm ${
+                        errors.firstName ? 'border-destructive' : ''
+                      }`}
                     />
                     {errors.firstName && (
-                      <p className="text-sm text-destructive">{errors.firstName}</p>
+                      <p className="text-xs text-destructive">{errors.firstName}</p>
                     )}
                   </div>
 
                   {/* Last Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Label htmlFor="lastName" className="text-sm">
+                      Last Name *
+                    </Label>
                     <Input
                       id="lastName"
                       name="lastName"
                       placeholder="Doe"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className={errors.lastName ? 'border-destructive' : ''}
+                      className={`text-sm ${
+                        errors.lastName ? 'border-destructive' : ''
+                      }`}
                     />
                     {errors.lastName && (
-                      <p className="text-sm text-destructive">{errors.lastName}</p>
+                      <p className="text-xs text-destructive">{errors.lastName}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                  <Label htmlFor="email" className="text-sm">
+                    Email Address *
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -261,16 +302,18 @@ export default function AddUserPage() {
                     placeholder="john.doe@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={errors.email ? 'border-destructive' : ''}
+                    className={`text-sm ${errors.email ? 'border-destructive' : ''}`}
                   />
                   {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
+                    <p className="text-xs text-destructive">{errors.email}</p>
                   )}
                 </div>
 
                 {/* Phone Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Label htmlFor="phone" className="text-sm">
+                    Phone Number *
+                  </Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -278,20 +321,24 @@ export default function AddUserPage() {
                     placeholder="+1 (555) 000-0000"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className={errors.phone ? 'border-destructive' : ''}
+                    className={`text-sm ${errors.phone ? 'border-destructive' : ''}`}
                   />
                   {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone}</p>
+                    <p className="text-xs text-destructive">{errors.phone}</p>
                   )}
                 </div>
 
                 {/* Password Section */}
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-4">Set Password</h3>
+                  <h3 className="text-base md:text-lg font-semibold mb-4">
+                    Set Password
+                  </h3>
 
                   {/* Password Field */}
                   <div className="space-y-2 mb-4">
-                    <Label htmlFor="password">Password *</Label>
+                    <Label htmlFor="password" className="text-sm">
+                      Password *
+                    </Label>
                     <div className="relative">
                       <Input
                         id="password"
@@ -300,9 +347,9 @@ export default function AddUserPage() {
                         placeholder="Enter a strong password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className={
+                        className={`text-sm ${
                           errors.password ? 'border-destructive pr-10' : 'pr-10'
-                        }
+                        }`}
                       />
                       <button
                         type="button"
@@ -317,7 +364,7 @@ export default function AddUserPage() {
                       </button>
                     </div>
                     {errors.password && (
-                      <p className="text-sm text-destructive">{errors.password}</p>
+                      <p className="text-xs text-destructive">{errors.password}</p>
                     )}
 
                     {/* Password Strength Indicator */}
@@ -338,41 +385,41 @@ export default function AddUserPage() {
                         <div className="space-y-1 text-xs">
                           <div className="flex items-center gap-2">
                             {passwordStrength.requirements.length ? (
-                              <Check className="h-3 w-3 text-green-500" />
+                              <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
                             ) : (
-                              <X className="h-3 w-3 text-gray-300" />
+                              <X className="h-3 w-3 text-gray-300 flex-shrink-0" />
                             )}
                             <span>At least 8 characters</span>
                           </div>
                           <div className="flex items-center gap-2">
                             {passwordStrength.requirements.uppercase ? (
-                              <Check className="h-3 w-3 text-green-500" />
+                              <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
                             ) : (
-                              <X className="h-3 w-3 text-gray-300" />
+                              <X className="h-3 w-3 text-gray-300 flex-shrink-0" />
                             )}
                             <span>One uppercase letter</span>
                           </div>
                           <div className="flex items-center gap-2">
                             {passwordStrength.requirements.lowercase ? (
-                              <Check className="h-3 w-3 text-green-500" />
+                              <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
                             ) : (
-                              <X className="h-3 w-3 text-gray-300" />
+                              <X className="h-3 w-3 text-gray-300 flex-shrink-0" />
                             )}
                             <span>One lowercase letter</span>
                           </div>
                           <div className="flex items-center gap-2">
                             {passwordStrength.requirements.number ? (
-                              <Check className="h-3 w-3 text-green-500" />
+                              <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
                             ) : (
-                              <X className="h-3 w-3 text-gray-300" />
+                              <X className="h-3 w-3 text-gray-300 flex-shrink-0" />
                             )}
                             <span>One number</span>
                           </div>
                           <div className="flex items-center gap-2">
                             {passwordStrength.requirements.special ? (
-                              <Check className="h-3 w-3 text-green-500" />
+                              <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
                             ) : (
-                              <X className="h-3 w-3 text-gray-300" />
+                              <X className="h-3 w-3 text-gray-300 flex-shrink-0" />
                             )}
                             <span>One special character</span>
                           </div>
@@ -383,7 +430,9 @@ export default function AddUserPage() {
 
                   {/* Confirm Password Field */}
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                    <Label htmlFor="confirmPassword" className="text-sm">
+                      Confirm Password *
+                    </Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
@@ -392,9 +441,9 @@ export default function AddUserPage() {
                         placeholder="Re-enter your password"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className={
+                        className={`text-sm ${
                           errors.confirmPassword ? 'border-destructive pr-10' : 'pr-10'
-                        }
+                        }`}
                       />
                       <button
                         type="button"
@@ -409,7 +458,7 @@ export default function AddUserPage() {
                       </button>
                     </div>
                     {errors.confirmPassword && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-xs text-destructive">
                         {errors.confirmPassword}
                       </p>
                     )}
@@ -420,30 +469,38 @@ export default function AddUserPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Role */}
                   <div className="space-y-2">
-                    <Label htmlFor="role">Role *</Label>
+                    <Label htmlFor="role" className="text-sm">
+                      Role *
+                    </Label>
                     <Select
                       value={formData.role}
                       onValueChange={(value) => handleSelectChange('role', value)}
                     >
-                      <SelectTrigger className={errors.role ? 'border-destructive' : ''}>
+                      <SelectTrigger
+                        className={`text-sm ${
+                          errors.role ? 'border-destructive' : ''
+                        }`}
+                      >
                         <SelectValue placeholder="Select a role" />
                       </SelectTrigger>
                       <SelectContent>
                         {roles.map((role) => (
-                          <SelectItem key={role} value={role}>
+                          <SelectItem key={role} value={role} className="text-sm">
                             {role}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {errors.role && (
-                      <p className="text-sm text-destructive">{errors.role}</p>
+                      <p className="text-xs text-destructive">{errors.role}</p>
                     )}
                   </div>
 
                   {/* Department */}
                   <div className="space-y-2">
-                    <Label htmlFor="department">Department *</Label>
+                    <Label htmlFor="department" className="text-sm">
+                      Department *
+                    </Label>
                     <Select
                       value={formData.department}
                       onValueChange={(value) =>
@@ -451,32 +508,36 @@ export default function AddUserPage() {
                       }
                     >
                       <SelectTrigger
-                        className={errors.department ? 'border-destructive' : ''}
+                        className={`text-sm ${
+                          errors.department ? 'border-destructive' : ''
+                        }`}
                       >
                         <SelectValue placeholder="Select a department" />
                       </SelectTrigger>
                       <SelectContent>
                         {departments.map((dept) => (
-                          <SelectItem key={dept} value={dept}>
+                          <SelectItem key={dept} value={dept} className="text-sm">
                             {dept}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {errors.department && (
-                      <p className="text-sm text-destructive">{errors.department}</p>
+                      <p className="text-xs text-destructive">{errors.department}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Status Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status" className="text-sm">
+                    Status
+                  </Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) => handleSelectChange('status', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -487,16 +548,21 @@ export default function AddUserPage() {
                 </div>
 
                 {/* Form Actions */}
-                <div className="flex gap-3 justify-end pt-6 border-t">
+                <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-6 border-t">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleReset}
                     disabled={isLoading}
+                    className="w-full sm:w-auto"
                   >
                     Reset
                   </Button>
-                  <Button type="submit" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full sm:w-auto"
+                  >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -515,16 +581,16 @@ export default function AddUserPage() {
 
       {/* Success Dialog */}
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[90vw] max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>User Created Successfully</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-sm">
               The user account has been created and is ready to use. They can now sign in with their email and password.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-3 justify-end">
-            <AlertDialogCancel>Create Another</AlertDialogCancel>
-            <AlertDialogAction asChild>
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
+            <AlertDialogCancel onClick={() => setShowSuccessDialog(false)}>Create Another</AlertDialogCancel>
+            <AlertDialogAction asChild onClick={() => router.push('/admin/users')}>
               <Link href="/admin/users">View Users</Link>
             </AlertDialogAction>
           </div>
