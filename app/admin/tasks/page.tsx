@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Eye, Calendar, User } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -38,68 +39,83 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  assigned_to: string;
+  due_date: string;
+}
+
+interface User {
+  id: string;
+  full_name: string;
+}
+
 export default function TasksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Sample tasks data
-  const tasks = [
-    {
-      id: 1,
-      title: 'Complete project documentation',
-      description: 'Write comprehensive docs for the API',
-      status: 'in-progress',
-      priority: 'high',
-      assignee: 'John Doe',
-      dueDate: '2026-01-20',
-      createdAt: '2026-01-10',
-    },
-    {
-      id: 2,
-      title: 'Fix login bug',
-      description: 'Session timeout not working properly',
-      status: 'pending',
-      priority: 'critical',
-      assignee: 'Jane Smith',
-      dueDate: '2026-01-18',
-      createdAt: '2026-01-12',
-    },
-    {
-      id: 3,
-      title: 'Design dashboard layout',
-      description: 'Create mockups for new admin dashboard',
-      status: 'completed',
-      priority: 'medium',
-      assignee: 'Mike Johnson',
-      dueDate: '2026-01-15',
-      createdAt: '2026-01-08',
-    },
-    {
-      id: 4,
-      title: 'Database optimization',
-      description: 'Optimize slow running queries',
-      status: 'in-progress',
-      priority: 'high',
-      assignee: 'Sarah Wilson',
-      dueDate: '2026-01-25',
-      createdAt: '2026-01-11',
-    },
-    {
-      id: 5,
-      title: 'User feedback implementation',
-      description: 'Add new features based on user feedback',
-      status: 'pending',
-      priority: 'low',
-      assignee: 'John Doe',
-      dueDate: '2026-02-01',
-      createdAt: '2026-01-09',
-    },
-  ];
+  // Fetch tasks and users on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log('Starting fetch data...');
+      try {
+        console.log('Fetching from /api/tasks/gettask and /api/users/getusers');
+        const [tasksRes, usersRes] = await Promise.all([
+          fetch('/api/tasks/gettask'),
+          fetch('/api/users/getusers'),
+        ]);
+        
+        console.log('Responses received');
+        console.log('Tasks Response Status:', tasksRes.status);
+        console.log('Users Response Status:', usersRes.status);
+        
+        const tasksData = await tasksRes.json();
+        const usersData = await usersRes.json();
+        
+        console.log('Raw Tasks Response:', tasksData);
+        console.log('Raw Users Response:', usersData);
+        
+        const tasksArray = tasksData.data || [];
+        const usersArray = usersData.users || [];
+        
+        console.log(`Parsed Tasks: ${tasksArray.length} tasks found`);
+        console.log('Tasks array:', tasksArray);
+        console.log(`Parsed Users: ${usersArray.length} users found`);
+        console.log('Users array:', usersArray);
+        
+        setTasks(tasksArray);
+        setUsers(usersArray);
+        
+        console.log('State updated with tasks and users');
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setTasks([]);
+        setUsers([]);
+      } finally {
+        setIsLoading(false);
+        console.log('Loading complete');
+      }
+    };
+    fetchData();
+  }, []);
 
-  // Filter tasks
+  // Function to get assignee name by ID
+  const getAssigneeName = (userId: string) => {
+    const user = users.find((u) => u.id === userId);
+    return user?.full_name || 'Unassigned';
+  };
+  
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,6 +126,12 @@ export default function TasksPage() {
 
     return matchesSearch && matchesStatus && matchesPriority;
   });
+
+  // Log when tasks change
+  useEffect(() => {
+    console.log('📊 Tasks state updated:', tasks);
+    console.log('📊 Filtered tasks:', filteredTasks);
+  }, [tasks, filteredTasks]);
 
   // Status badge color
   const getStatusColor = (status: string) => {
@@ -141,16 +163,45 @@ export default function TasksPage() {
     }
   };
 
-  const handleDelete = (taskId: number) => {
+  const handleDelete = (taskId: string) => {
     setSelectedTaskId(taskId);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (selectedTaskId !== null) {
-      console.log('Delete task:', selectedTaskId);
+  const confirmDelete = async () => {
+    if (selectedTaskId === null) return;
+
+    setIsDeleting(true);
+    const loadingToast = toast.loading('Deleting task...');
+
+    try {
+      console.log('Deleting task:', selectedTaskId);
+      
+      const response = await fetch(`/api/tasks/deletetask?id=${selectedTaskId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+      console.log('Delete response:', result);
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete task');
+      }
+
+      // Remove from local state
+      setTasks(tasks.filter(t => t.id !== selectedTaskId));
+      console.log('Task deleted successfully');
+      
+      toast.dismiss(loadingToast);
+      toast.success('Task deleted successfully!');
       setDeleteDialogOpen(false);
       setSelectedTaskId(null);
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast.dismiss(loadingToast);
+      toast.error('Failed to delete task. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -247,72 +298,88 @@ export default function TasksPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTasks.length > 0 ? (
-                  filteredTasks.map((task) => (
-                    <TableRow key={task.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{task.title}</p>
-                          <p className="text-sm text-gray-500">
-                            {task.description}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={getStatusColor(task.status)}
-                        >
-                          {task.status.replace('-', ' ')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={getPriorityColor(task.priority)}
-                        >
-                          {task.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User size={16} className="text-gray-400" />
-                          {task.assignee}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar size={16} className="text-gray-400" />
-                          {new Date(task.dueDate).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link href={`/admin/tasks/${task.id}`}>
-                            <Button variant="ghost" size="sm">
-                              <Eye size={16} />
-                            </Button>
-                          </Link>
-                          <Link href={`/admin/tasks/${task.id}/edit`}>
-                            <Button variant="ghost" size="sm">
-                              <Edit2 size={16} />
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(task.id)}
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <p className="text-gray-500">Loading tasks...</p>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredTasks.length > 0 ? (
+                  filteredTasks.map((task) => {
+                    console.log('Rendering task:', task);
+                    return (
+                      <TableRow key={task.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{task.title}</p>
+                            <p className="text-sm text-gray-500">
+                              {task.description}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className={getStatusColor(task.status)}
                           >
-                            <Trash2 size={16} className="text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                            {task.status.replace('-', ' ')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className={getPriorityColor(task.priority)}
+                          >
+                            {task.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <User size={16} className="text-gray-400" />
+                            {getAssigneeName(task.assigned_to)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar size={16} className="text-gray-400" />
+                            {new Date(task.due_date).toLocaleDateString()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link href={`/admin/tasks/${task.id}`}>
+                              <Button variant="ghost" size="sm">
+                                <Eye size={16} />
+                              </Button>
+                            </Link>
+                            <Link href={`/admin/tasks/${task.id}/edit`}>
+                              <Button variant="ghost" size="sm">
+                                <Edit2 size={16} />
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(task.id)}
+                            >
+                              <Trash2 size={16} className="text-red-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8">
-                      <p className="text-gray-500">No tasks found</p>
+                      <div>
+                        <p className="text-gray-500 font-medium">No tasks found</p>
+                        <p className="text-sm text-gray-400 mt-2">
+                          {isLoading 
+                            ? 'Loading...' 
+                            : `Tasks: ${tasks.length} | Filtered: ${filteredTasks.length} | Status: ${statusFilter} | Priority: ${priorityFilter}`}
+                        </p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -333,12 +400,13 @@ export default function TasksPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-3 justify-end">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
+              disabled={isDeleting}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>

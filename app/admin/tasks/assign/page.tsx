@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -30,19 +30,19 @@ interface AssignmentFormData {
 }
 
 interface Task {
-  id: number;
+  id: string;
   title: string;
   status: string;
   priority: string;
-  currentAssignee?: string;
+  assigned_to?: string;
 }
 
 interface TeamMember {
-  id: number;
-  name: string;
+  id: string;
+  full_name: string;
   email: string;
-  department: string;
-  tasksCount: number;
+  department?: string;
+  tasksCount?: number;
 }
 
 export default function AssignTaskPage() {
@@ -56,88 +56,49 @@ export default function AssignTaskPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  // Sample tasks data
-  const tasks: Task[] = [
-    {
-      id: 1,
-      title: 'Complete project documentation',
-      status: 'pending',
-      priority: 'high',
-      currentAssignee: 'John Doe',
-    },
-    {
-      id: 2,
-      title: 'Fix login bug',
-      status: 'pending',
-      priority: 'critical',
-      currentAssignee: 'Jane Smith',
-    },
-    {
-      id: 3,
-      title: 'Database optimization',
-      status: 'in-progress',
-      priority: 'high',
-    },
-    {
-      id: 4,
-      title: 'User feedback implementation',
-      status: 'pending',
-      priority: 'low',
-    },
-    {
-      id: 5,
-      title: 'API endpoint testing',
-      status: 'pending',
-      priority: 'medium',
-    },
-  ];
+  // Fetch tasks and team members
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch('/api/tasks/gettask');
+        const result = await response.json();
+        if (response.ok) {
+          setTasks(result.data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch tasks:', error);
+      }
+    };
+    fetchTasks();
+  }, []);
 
-  // Sample team members
-  const teamMembers: TeamMember[] = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      department: 'Backend',
-      tasksCount: 5,
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      department: 'Frontend',
-      tasksCount: 4,
-    },
-    {
-      id: 3,
-      name: 'Mike Johnson',
-      email: 'mike@example.com',
-      department: 'Design',
-      tasksCount: 3,
-    },
-    {
-      id: 4,
-      name: 'Sarah Wilson',
-      email: 'sarah@example.com',
-      department: 'DevOps',
-      tasksCount: 6,
-    },
-    {
-      id: 5,
-      name: 'Tom Brown',
-      email: 'tom@example.com',
-      department: 'QA',
-      tasksCount: 2,
-    },
-  ];
+  // Fetch team members
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await fetch('/api/users/getusers');
+        const result = await response.json();
+        if (response.ok) {
+          setTeamMembers(result.users || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch team members:', error);
+      }
+    };
+    fetchTeamMembers();
+  }, []);
+
+  // Team members state
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   const handleTaskChange = (taskId: string) => {
     setFormData((prev) => ({
       ...prev,
       taskId,
     }));
-    const task = tasks.find((t) => t.id === parseInt(taskId));
+    const task = tasks.find((t) => t.id === taskId);
     setSelectedTask(task || null);
     if (errors.taskId) {
       setErrors((prev) => ({
@@ -203,18 +164,36 @@ export default function AssignTaskPage() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch('/api/tasks/assign', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to assign task');
+      }
+
       console.log('Task assigned:', formData);
-      // In a real app, you would redirect here
-      // redirect('/admin/tasks');
+      // Reset form
+      setFormData({
+        taskId: '',
+        assignee: '',
+        dueDate: '',
+        notes: '',
+      });
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Error assigning task:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const getAssignee = () => {
-    return teamMembers.find((m) => m.name === formData.assignee);
+    return teamMembers.find((m) => m.full_name === formData.assignee);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -340,9 +319,9 @@ export default function AssignTaskPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {teamMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.name}>
+                        <SelectItem key={member.id} value={member.full_name}>
                           <div className="flex items-center gap-2">
-                            {member.name} • {member.department}
+                            {member.full_name} • {member.department}
                           </div>
                         </SelectItem>
                       ))}
@@ -359,7 +338,7 @@ export default function AssignTaskPage() {
                     <div className="flex items-center gap-2">
                       <User size={16} className="text-blue-600" />
                       <span className="font-semibold">
-                        {getAssignee()?.name}
+                        {getAssignee()?.full_name}
                       </span>
                     </div>
                     <div className="text-sm space-y-1">
@@ -453,15 +432,15 @@ export default function AssignTaskPage() {
                   <div
                     key={member.id}
                     className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                      formData.assignee === member.name
+                      formData.assignee === member.full_name
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() =>
-                      handleSelectChange('assignee', member.name)
+                      handleSelectChange('assignee', member.full_name)
                     }
                   >
-                    <p className="font-medium text-sm">{member.name}</p>
+                    <p className="font-medium text-sm">{member.full_name}</p>
                     <p className="text-xs text-gray-500">
                       {member.department}
                     </p>

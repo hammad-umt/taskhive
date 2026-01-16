@@ -1,6 +1,7 @@
 'use client';
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -24,31 +25,44 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch('/api/login', {  
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-    const data = await response.json();
-    if(data.role === 'admin'){
-     router.push('/admin/dashboard');
-    }
-    else{
-      router.push('/user');
-     }
-    if(data.role === 'admin'){
-    console.log("Admin logged in");  
-    }
-    console.log(response);
+    setIsLoading(true);
     
-      };
+    try {
+      const response = await fetch('/api/login', {  
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+      
+      const data = await response.json();
+      
+      if (response.ok && data.role) {
+        toast.success('Login successful!');
+        if (data.role === 'admin') {
+          console.log("Admin logged in");  
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/user');
+        }
+      } else {
+        toast.error(data.message || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -84,7 +98,9 @@ export function LoginForm({
                 </div>
                 <Input id="password" type="password" onChange={handleChange} value={formData.password} required />
               </Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Logging in...' : 'Login'}
+                </Button>
             </FieldGroup>
           </form>
         </CardContent>

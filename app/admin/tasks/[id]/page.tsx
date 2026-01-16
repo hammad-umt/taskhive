@@ -1,24 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   User,
   Calendar,
-  Flag,
   Edit2,
   Trash2,
+  Clock,
   MessageSquare,
   Download,
-  Clock,
-  CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -35,85 +33,116 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface Task {
-  id: number;
+  id: string;
   title: string;
   description: string;
   status: 'pending' | 'in-progress' | 'completed';
   priority: 'low' | 'medium' | 'high' | 'critical';
-  assignee: string;
-  dueDate: string;
-  createdAt: string;
-  createdBy: string;
-  completedAt?: string;
-  comments: number;
-  attachments: number;
+  assigned_to: string;
+  due_date: string;
+  created_at: string;
+  created_by: string;
+  completed_at?: string;
 }
 
-interface Comment {
-  id: number;
-  author: string;
-  content: string;
-  date: string;
-  avatar: string;
+interface User {
+  id: string;
+  full_name: string;
 }
 
 export default function TaskDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const taskId = params.id;
 
-  // Sample task data - in a real app, fetch this from API
-  const task: Task = {
-    id: parseInt(taskId as string),
-    title: 'Complete project documentation',
-    description: 'Write comprehensive docs for the API including endpoint documentation, authentication, and error handling. Should include code examples and usage guides for developers.',
-    status: 'in-progress',
-    priority: 'high',
-    assignee: 'John Doe',
-    dueDate: '2026-01-20',
-    createdAt: '2026-01-10',
-    createdBy: 'Sarah Wilson',
-    comments: 3,
-    attachments: 2,
-  };
-
-  // Sample comments
-  const comments: Comment[] = [
-    {
-      id: 1,
-      author: 'Jane Smith',
-      content: 'Started working on the API documentation. Making good progress.',
-      date: '2026-01-14',
-      avatar: 'JS',
-    },
-    {
-      id: 2,
-      author: 'Mike Johnson',
-      content: 'Please make sure to include error handling documentation.',
-      date: '2026-01-13',
-      avatar: 'MJ',
-    },
-    {
-      id: 3,
-      author: 'John Doe',
-      content: 'Will add comprehensive examples for all endpoints by tomorrow.',
-      date: '2026-01-12',
-      avatar: 'JD',
-    },
-  ];
-
+  const [task, setTask] = useState<Task | null>(null);
+  const [assigneeName, setAssigneeName] = useState<string>('');
+  const [createdByName, setCreatedByName] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Fetch task data on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log('Fetching task data for ID:', taskId);
+      try {
+        const [taskRes, usersRes] = await Promise.all([
+          fetch(`/api/tasks/gettaskbyid?id=${taskId}`),
+          fetch('/api/users/getusers'),
+        ]);
+
+        const taskData = await taskRes.json();
+        const usersData = await usersRes.json();
+
+        console.log('Task data received:', taskData);
+        console.log('Users data received:', usersData);
+
+        if (taskRes.ok && taskData.data) {
+          setTask(taskData.data);
+          console.log('Task loaded:', {
+            assigned_to: taskData.data.assigned_to,
+            created_by: taskData.data.created_by,
+          });
+
+          // Find assignee and creator names
+          if (usersData.users) {
+            const assignee = usersData.users.find((u: User) => u.id === taskData.data.assigned_to);
+            const creator = usersData.users.find((u: User) => u.id === taskData.data.created_by);
+            
+            console.log('Found assignee:', assignee?.full_name);
+            console.log('Found creator:', creator?.full_name);
+            
+            if (assignee) setAssigneeName(assignee.full_name);
+            if (creator) setCreatedByName(creator.full_name);
+          }
+        } else {
+          throw new Error('Failed to fetch task data');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load task. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (taskId) {
+      fetchData();
+    }
+  }, [taskId]);
+
   const handleDelete = async () => {
     setIsDeleting(true);
+    const loadingToast = toast.loading('Deleting task...');
+
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('Task deleted:', taskId);
+      console.log('Deleting task:', taskId);
+      
+      const response = await fetch(`/api/tasks/deletetask?id=${taskId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+      console.log('Delete response:', result);
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete task');
+      }
+
+      console.log('Task deleted successfully');
+      toast.dismiss(loadingToast);
+      toast.success('Task deleted successfully!');
       setDeleteDialogOpen(false);
-      // In a real app, you would redirect here
-      // redirect('/admin/tasks');
-    } finally {
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        router.push('/admin/tasks');
+      }, 1500);
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast.dismiss(loadingToast);
+      toast.error('Failed to delete task. Please try again.');
       setIsDeleting(false);
     }
   };
@@ -147,22 +176,42 @@ export default function TaskDetailPage() {
   };
 
   const isOverdue =
-    task.status !== 'completed' &&
-    new Date(task.dueDate) < new Date();
+    task && task.status !== 'completed' &&
+    new Date(task.due_date) < new Date();
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/tasks">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft size={20} />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Task Details</h1>
-            <p className="text-gray-500">View and manage task information</p>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center space-y-3">
+            <div className="inline-block">
+              <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+            <p className="text-gray-600 font-medium">Loading task details...</p>
+          </div>
+        </div>
+      )}
+
+      {!isLoading && !task && (
+        <div className="text-center py-12">
+          <p className="text-gray-600 font-medium">Task not found</p>
+        </div>
+      )}
+
+      {!isLoading && task && (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/admin/tasks">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft size={20} />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Task Details</h1>
+                <p className="text-gray-500">View and manage task information</p>
           </div>
         </div>
 
@@ -235,12 +284,12 @@ export default function TaskDetailPage() {
                   <p className="text-sm text-gray-500 mb-1">Assigned To</p>
                   <div className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">
-                      {task.assignee
+                      {assigneeName
                         .split(' ')
                         .map((n) => n[0])
                         .join('')}
                     </div>
-                    <p className="font-semibold">{task.assignee}</p>
+                    <p className="font-semibold">{assigneeName}</p>
                   </div>
                 </div>
                 <div>
@@ -258,67 +307,19 @@ export default function TaskDetailPage() {
                   <div className="flex items-center gap-2">
                     <Calendar size={16} className="text-gray-400" />
                     <p className="font-semibold">
-                      {new Date(task.dueDate).toLocaleDateString()}
+                      {new Date(task.due_date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Created</p>
                   <p className="font-semibold">
-                    {new Date(task.createdAt).toLocaleDateString()}
+                    {new Date(task.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Created By</p>
-                  <p className="font-semibold">{task.createdBy}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Comments Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare size={20} />
-                Comments ({comments.length})
-              </CardTitle>
-              <CardDescription>
-                Team communication and task updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="border-b pb-4 last:border-b-0"
-                  >
-                    <div className="flex gap-3">
-                      <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm flex-shrink-0">
-                        {comment.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-semibold">{comment.author}</p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(comment.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <p className="text-gray-700">{comment.content}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Add Comment */}
-                <div className="pt-4 border-t">
-                  <textarea
-                    placeholder="Add a comment..."
-                    rows={3}
-                    className="w-full px-3 py-2 border rounded-md border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                  <Button className="mt-2">Post Comment</Button>
+                  <p className="font-semibold">{createdByName}</p>
                 </div>
               </div>
             </CardContent>
@@ -402,8 +403,8 @@ export default function TaskDetailPage() {
                 <div>
                   <p className="font-medium">Created</p>
                   <p className="text-gray-500">
-                    {new Date(task.createdAt).toLocaleDateString()} by{' '}
-                    {task.createdBy}
+                    {new Date(task.created_at).toLocaleDateString()} by{' '}
+                    {createdByName}
                   </p>
                 </div>
               </div>
@@ -419,38 +420,8 @@ export default function TaskDetailPage() {
                 <div>
                   <p className="font-medium">Due Date</p>
                   <p className="text-gray-500">
-                    {new Date(task.dueDate).toLocaleDateString()}
+                    {new Date(task.due_date).toLocaleDateString()}
                   </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Attachments */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Attachments</CardTitle>
-              <CardDescription>{task.attachments} file(s)</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="border rounded-lg p-3 flex items-center gap-3 hover:bg-gray-50">
-                <div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center text-red-600 font-bold text-sm">
-                  P
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">api_docs.pdf</p>
-                  <p className="text-xs text-gray-500">2.4 MB</p>
-                </div>
-              </div>
-              <div className="border rounded-lg p-3 flex items-center gap-3 hover:bg-gray-50">
-                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center text-blue-600 font-bold text-sm">
-                  X
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    examples.xlsx
-                  </p>
-                  <p className="text-xs text-gray-500">856 KB</p>
                 </div>
               </div>
             </CardContent>
@@ -464,12 +435,12 @@ export default function TaskDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Task</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {task.title}? This action cannot
+              Are you sure you want to delete {task?.title}? This action cannot
               be undone and all associated data will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-3 justify-end">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
@@ -480,6 +451,8 @@ export default function TaskDetailPage() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+        </>
+      )}
     </div>
   );
 }

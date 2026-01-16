@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -42,16 +43,24 @@ export default function NewTaskPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assignees, setAssignees] = useState<Array<{
+    full_name: ReactNode; id: number; name: string 
+}>>([]);
 
-  // Sample assignees list
-  const assignees = [
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Smith' },
-    { id: 3, name: 'Mike Johnson' },
-    { id: 4, name: 'Sarah Wilson' },
-    { id: 5, name: 'Tom Brown' },
-  ];
-
+  // Fetch assignees on mount
+  useEffect(() => {
+    const fetchAssignees = async () => {
+      try {
+        const response = await fetch('/api/users/getusers');
+        const data = await response.json();
+        console.log('Fetched assignees:', data);
+        setAssignees(data.users || []);
+      } catch (error) {
+        console.error('Failed to fetch assignees:', error);
+      }
+    };
+    fetchAssignees();
+  }, []);
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -113,11 +122,34 @@ export default function NewTaskPage() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch('/api/tasks/addtask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
+
       console.log('Task created:', formData);
-      // In a real app, you would redirect here
-      // redirect('/admin/tasks');
+      toast.success('Task created successfully!');
+      
+      // Clear form data
+      setFormData({
+        title: '',
+        description: '',
+        status: 'pending',
+        priority: 'medium',
+        assignee: '',
+        dueDate: '',
+      });
+      setErrors({});
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast.error('Failed to create task. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -241,8 +273,8 @@ export default function NewTaskPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {assignees.map((assignee) => (
-                    <SelectItem key={assignee.id} value={assignee.name}>
-                      {assignee.name}
+                    <SelectItem key={assignee.id} value={assignee.id.toString()}>
+                      {assignee?.full_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
