@@ -137,7 +137,7 @@ export function LoginForm({
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <span className="animate-spin">⏳</span>
+                    
                     Signing in...
                   </span>
                 ) : (
