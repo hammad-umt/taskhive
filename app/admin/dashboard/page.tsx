@@ -231,7 +231,7 @@ export default function DashboardPage() {
       value: totalUsers.toString(),
       icon: Users,
       trend: userTrend,
-      color: 'bg-blue-500',
+      color: 'bg-indigo-500',
     },
     {
       title: 'Active Tasks',
@@ -424,7 +424,7 @@ export default function DashboardPage() {
                           <p className="font-semibold">{data.name}</p>
                           <p className="text-green-600">Completed: {data.completed}</p>
                           <p className="text-gray-600">Total: {data.total}</p>
-                          <p className="text-blue-600 font-bold">Rate: {data.completionRate}%</p>
+                          <p className="text-indigo-600 font-bold">Rate: {data.completionRate}%</p>
                         </div>
                       );
                     }

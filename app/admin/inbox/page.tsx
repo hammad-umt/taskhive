@@ -103,13 +103,13 @@ export default function InboxPage() {
     <div className="p-8 max-w-5xl mx-auto">
       <Card className="overflow-hidden">
         {/* Header */}
-          <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6">
+          <div className="bg-linear-to-r from-indigo-600 to-purple-600 text-white p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold">Inbox</h1>
               <p className="text-blue-100 mt-1">{unreadCount} unread messages</p>
             </div>
-            <div className="bg-white text-blue-600 rounded-full px-4 py-2 font-bold text-lg">
+            <div className="bg-white text-indigo-600 rounded-full px-4 py-2 font-bold text-lg">
               {messages.length}
             </div>
           </div>
@@ -137,13 +137,13 @@ export default function InboxPage() {
                   markAsRead(message.id);
                 }}
                 className={`p-4 cursor-pointer transition-all hover:bg-gray-50 ${
-                  !message.read ? 'bg-blue-50 border-l-4 border-blue-600' : 'bg-white'
+                  !message.read ? 'bg-indigo-50 border-l-4 border-indigo-600' : 'bg-white'
                 } ${selectedMessage === message.id ? 'ring-2 ring-blue-400' : ''}`}
               >
                 <div className="flex items-center gap-4">
                   {/* Avatar */}
                   <div className="shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center font-bold">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold">
                       {message.avatar}
                     </div>
                   </div>

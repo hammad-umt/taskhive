@@ -174,7 +174,7 @@ export default function SearchPage() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'task':
-        return <CheckSquare className="h-5 w-5 text-blue-500" />;
+        return <CheckSquare className="h-5 w-5 text-indigo-500" />;
       case 'user':
         return <Users className="h-5 w-5 text-green-500" />;
       case 'document':

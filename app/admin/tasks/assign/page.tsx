@@ -360,7 +360,7 @@ export default function AssignTaskPage() {
                 {formData.assignee && getAssignee() && (
                   <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-2">
                     <div className="flex items-center gap-2">
-                      <User size={16} className="text-blue-600" />
+                      <User size={16} className="text-indigo-600" />
                       <span className="font-semibold">
                         {getAssignee()?.full_name}
                       </span>
@@ -413,7 +413,7 @@ export default function AssignTaskPage() {
                     rows={4}
                     value={formData.notes}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border rounded-md border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-md border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
@@ -457,7 +457,7 @@ export default function AssignTaskPage() {
                     key={member.id}
                     className={`p-3 rounded-lg border transition-all cursor-pointer ${
                       formData.assignee === member.full_name
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-indigo-500 bg-indigo-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() =>

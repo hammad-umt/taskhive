@@ -336,7 +336,7 @@ export default function EditTaskPage() {
                         value={formData.description}
                         onChange={handleInputChange}
                         disabled={isSubmitting}
-                        className={`w-full px-3 py-2 border rounded-md border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                        className={`w-full px-3 py-2 border rounded-md border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                           errors.description ? 'border-red-500' : ''
                         }`}
                       />
@@ -485,7 +485,7 @@ export default function EditTaskPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500">Task ID</p>
-                    <p className="font-mono font-semibold text-blue-600">#{taskId}</p>
+                    <p className="font-mono font-semibold text-indigo-600">#{taskId}</p>
                   </div>
                   <div className="border-t pt-4">
                     <p className="text-sm text-gray-500">Status</p>

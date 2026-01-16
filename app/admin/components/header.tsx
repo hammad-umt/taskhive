@@ -55,7 +55,7 @@ export default function Header() {
             <input
               type="text"
               placeholder="Search users, tasks..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function Header() {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition duration-200"
             >
-              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white shrink-0">
+              <div className="w-8 h-8 bg-linear-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white shrink-0">
                 <User size={16} />
               </div>
               <div className="hidden sm:block text-left">
@@ -178,7 +178,7 @@ export default function Header() {
               className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition duration-200"
               title="Profile"
             >
-              <div className="w-6 h-6 bg-linear-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white">
+              <div className="w-6 h-6 bg-linear-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white">
                 <User size={14} />
               </div>
             </button>

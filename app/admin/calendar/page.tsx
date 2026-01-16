@@ -58,7 +58,7 @@ export default function CalendarPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <Card className="p-6">
-        <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-6">
+        <div className="bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-lg p-6 mb-6">
           <h1 className="text-3xl font-bold mb-4">Calendar Demo</h1>
 
           {/* Month Navigation */}
@@ -67,7 +67,7 @@ export default function CalendarPage() {
               variant="outline"
               size="icon"
               onClick={previousMonth}
-              className="bg-white text-blue-600 hover:bg-gray-100"
+              className="bg-white text-indigo-600 hover:bg-gray-100"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -76,7 +76,7 @@ export default function CalendarPage() {
               variant="outline"
               size="icon"
               onClick={nextMonth}
-              className="bg-white text-blue-600 hover:bg-gray-100"
+              className="bg-white text-indigo-600 hover:bg-gray-100"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -109,14 +109,14 @@ export default function CalendarPage() {
                 key={day}
                 className={`aspect-square rounded-lg p-2 border-2 cursor-pointer transition-all hover:shadow-lg ${
                   isToday
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-indigo-500 bg-indigo-50'
                     : event
                       ? `${event.color} border-gray-200`
                       : 'border-gray-200 bg-white hover:bg-gray-50'
                 }`}
               >
                 <div className="flex flex-col h-full">
-                  <span className={`text-sm font-bold ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
+                  <span className={`text-sm font-bold ${isToday ? 'text-indigo-600' : 'text-gray-700'}`}>
                     {day}
                   </span>
                   {event && (

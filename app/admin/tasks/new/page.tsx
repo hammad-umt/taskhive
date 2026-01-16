@@ -245,7 +245,7 @@ export default function NewTaskPage() {
                 rows={4}
                 value={formData.description}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
                   errors.description ? 'border-red-500' : ''
                 }`}
               />

@@ -271,7 +271,7 @@ export default function UserDetailPage() {
               <div className="flex gap-6">
                 {/* Avatar */}
                 <div className="shrink-0">
-                  <div className="h-24 w-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-bold">
+                  <div className="h-24 w-24 rounded-full bg-indigo-500 flex items-center justify-center text-white text-3xl font-bold">
                     {user.avatar}
                   </div>
                 </div>
@@ -485,7 +485,7 @@ export default function UserDetailPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                <div className="h-2 w-2 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
                 <div>
                   <p className="font-medium">Last task update</p>
                   <p className="text-gray-500">2 hours ago</p>

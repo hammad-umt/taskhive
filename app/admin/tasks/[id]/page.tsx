@@ -276,7 +276,7 @@ export default function TaskDetailPage() {
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Assigned To</p>
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">
+                    <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-bold">
                       {assigneeName
                         .split(' ')
                         .map((n) => n[0])
@@ -368,7 +368,7 @@ export default function TaskDetailPage() {
                       task.status === 'completed'
                         ? 'bg-green-500'
                         : task.status === 'in-progress'
-                          ? 'bg-blue-500 w-2/3'
+                          ? 'bg-indigo-500 w-2/3'
                           : 'bg-yellow-500 w-1/3'
                     }`}
                     style={{
@@ -402,7 +402,7 @@ export default function TaskDetailPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                <div className="h-2 w-2 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
                 <div>
                   <p className="font-medium">In Progress</p>
                   <p className="text-gray-500">Started 3 days ago</p>
