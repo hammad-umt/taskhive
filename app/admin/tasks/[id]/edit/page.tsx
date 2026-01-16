@@ -31,6 +31,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { FormSkeleton } from '@/app/components/skeleton-loaders';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface TaskFormData {
   title: string;
@@ -108,7 +110,7 @@ export default function EditTaskPage() {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        toast.error('Failed to load task. Please try again.');
+        toastNotifications.error.fetchFailed('task details');
       } finally {
         setIsLoading(false);
       }
@@ -176,12 +178,12 @@ export default function EditTaskPage() {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error('Please fix the errors in the form');
+      toastNotifications.error.validation('Please fix the errors in the form');
       return;
     }
 
     setIsSubmitting(true);
-    const loadingToast = toast.loading('Saving task...');
+    const loadingToast = toastNotifications.info.processing('Saving task...');
 
     try {
       console.log('Submitting task update:', { id: taskId, ...formData });
@@ -206,7 +208,7 @@ export default function EditTaskPage() {
 
       console.log('Task updated successfully');
       toast.dismiss(loadingToast);
-      toast.success('Task updated successfully!');
+      toastNotifications.success.updated('Task');
       
       setIsDirty(false);
       
@@ -217,7 +219,7 @@ export default function EditTaskPage() {
     } catch (error) {
       console.error('Error updating task:', error);
       toast.dismiss(loadingToast);
-      toast.error('Failed to update task. Please try again.');
+      toastNotifications.error.updateFailed('task');
     } finally {
       setIsSubmitting(false);
     }
@@ -225,7 +227,7 @@ export default function EditTaskPage() {
 
   const handleDelete = async () => {
     setIsSubmitting(true);
-    const loadingToast = toast.loading('Deleting task...');
+    const loadingToast = toastNotifications.info.processing('Deleting task...');
 
     try {
       console.log('Deleting task:', taskId);
@@ -243,7 +245,7 @@ export default function EditTaskPage() {
 
       console.log('Task deleted successfully');
       toast.dismiss(loadingToast);
-      toast.success('Task deleted successfully!');
+      toastNotifications.success.deleted('Task');
       
       setDeleteDialogOpen(false);
       
@@ -254,7 +256,7 @@ export default function EditTaskPage() {
     } catch (error) {
       console.error('Error deleting task:', error);
       toast.dismiss(loadingToast);
-      toast.error('Failed to delete task. Please try again.');
+      toastNotifications.error.deleteFailed('task');
       setIsSubmitting(false);
     }
   };
@@ -269,16 +271,7 @@ export default function EditTaskPage() {
   return (
     <div className="space-y-6">
       {/* Loading State */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center space-y-3">
-            <div className="inline-block">
-              <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            </div>
-            <p className="text-gray-600 font-medium">Loading task details...</p>
-          </div>
-        </div>
-      )}
+      {isLoading && <FormSkeleton />}
 
       {!isLoading && (
         <>

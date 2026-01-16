@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Users, CheckSquare, Clock, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -33,94 +33,290 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Skeleton Components
+const StatSkeleton = () => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-10 w-10 rounded-lg" />
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-8 w-12 mb-2" />
+      <Skeleton className="h-3 w-32" />
+    </CardContent>
+  </Card>
+);
+
+const ChartSkeleton = () => (
+  <Card>
+    <CardHeader>
+      <Skeleton className="h-6 w-32 mb-2" />
+      <Skeleton className="h-4 w-48" />
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-80 w-full" />
+    </CardContent>
+  </Card>
+);
+
+const TableSkeleton = () => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between">
+      <div>
+        <Skeleton className="h-6 w-32 mb-2" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Counter component
+const Counter = ({ value, duration = 1000 }: { value: number | string; duration?: number }) => {
+  const [displayValue, setDisplayValue] = React.useState(0);
+  const numValue = parseInt(value.toString());
+
+  React.useEffect(() => {
+    let start = 0;
+    const increment = Math.ceil(numValue / (duration / 16));
+    const interval = setInterval(() => {
+      start += increment;
+      if (start >= numValue) {
+        setDisplayValue(numValue);
+        clearInterval(interval);
+      } else {
+        setDisplayValue(start);
+      }
+    }, 16);
+    return () => clearInterval(interval);
+  }, [numValue, duration]);
+
+  return <>{displayValue}</>;
+};
 
 export default function DashboardPage() {
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [totalUsers, setTotalUsers] = React.useState(0);
+  const [userTrend, setUserTrend] = React.useState('+12%');
+  const [totalTasks, setTotalTasks] = React.useState(0);
+  const [pendingTasks, setPendingTasks] = React.useState(0);
+  const [completionRate, setCompletionRate] = React.useState(0);
+  const [inProgressTasks, setInProgressTasks] = React.useState(0);
+  const [completedTasks, setCompletedTasks] = React.useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [recentTasks, setRecentTasks] = React.useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [recentUsers, setRecentUsers] = React.useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [allUsers, setAllUsers] = React.useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [chartData, setChartData] = React.useState<any[]>([]);
+  
+  useEffect(() => {
+    const fetchWithRetry = async (url: string, maxRetries = 3) => {
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error(`Fetch attempt ${i + 1} failed for ${url}:`, error);
+          if (i < maxRetries - 1) {
+            // Exponential backoff: 500ms, 1000ms, 2000ms
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 500));
+          } else {
+            throw error;
+          }
+        }
+      }
+    };
+    
+    const fetchData = async () => {
+      const users = await fetchWithRetry('/api/users/getusers');
+      const tasks = await fetchWithRetry('/api/tasks/gettask');
+      
+      console.log(tasks);
+      console.log(users);
+      const tasksCount = tasks.data.length;
+      const userCount = users.users.length;
+      setTotalUsers(userCount);
+      setTotalTasks(tasksCount);
+      setAllUsers(users.users);
+      
+      // Calculate trend based on user count
+      const trend = userCount > 10 ? '+15%' : userCount > 5 ? '+12%' : '+8%';
+      setUserTrend(trend);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pending = tasks.data.filter((task: any) => task.status === 'pending').length;
+      setPendingTasks(pending);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const completed = tasks.data.filter((task: any) => task.status === 'completed').length;
+      const completion = tasksCount > 0 ? Math.round((completed / tasksCount) * 100) : 0;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const inProgress = tasks.data.filter((task: any) => task.status === 'in-progress').length;
+      setInProgressTasks(inProgress);
+      setCompletedTasks(completed);
+      setCompletionRate(completion);
+      
+      // Set recent tasks (last 4)
+      const recent = tasks.data.slice(-4).reverse();
+      setRecentTasks(recent);
+      
+      // Set recent users (last 3)
+      const recentUsersList = users.users.slice(-3).reverse();
+      setRecentUsers(recentUsersList);
+
+      // Calculate performance trend - tasks completed per day of the week
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const performanceData = dayNames.map((day, index) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const tasksOnDay = tasks.data.filter((task: any) => {
+          if (!task.created_at) return false;
+          const taskDate = new Date(task.created_at);
+          return taskDate.getDay() === index;
+        });
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const completedOnDay = tasksOnDay.filter((task: any) => task.status === 'completed').length;
+        const totalOnDay = tasksOnDay.length;
+        const completionRate = totalOnDay > 0 ? Math.round((completedOnDay / totalOnDay) * 100) : 0;
+        
+        return {
+          name: day,
+          completed: completedOnDay,
+          total: totalOnDay,
+          completionRate: completionRate
+        };
+      });
+      
+      setChartData(performanceData);
+      
+      console.log("Total Users:", userCount);
+      console.log("User Trend:", trend);
+      console.log("Recent Tasks:", recent);
+      console.log("Recent Users:", recentUsersList);
+      console.log("Performance Data:", performanceData);
+      
+      // Set loading to false when data is fetched
+      setIsLoading(false);
+    }
+    
+    fetchData().catch((error) => {
+      console.error('Dashboard data fetch failed:', error);
+      setIsLoading(false);
+      // Show error to user
+      toast.error('Failed to load dashboard data. Please refresh the page.');
+    });
+  },[]);
+  
+  // Function to get assignee name by ID
+  const getAssigneeName = (userId: string) => {
+    const user = allUsers.find((u) => u.id === userId);
+    return user?.full_name || 'Unassigned';
+  };
+  
   // Sample data
   const stats = [
     {
       title: 'Total Users',
-      value: '1,234',
+      value: totalUsers.toString(),
       icon: Users,
-      trend: '+12%',
+      trend: userTrend,
       color: 'bg-blue-500',
     },
     {
       title: 'Active Tasks',
-      value: '567',
+      value: totalTasks.toString(),
       icon: CheckSquare,
       trend: '+8%',
       color: 'bg-green-500',
     },
     {
       title: 'Pending Tasks',
-      value: '89',
+      value: pendingTasks.toString(),
       icon: Clock,
       trend: '-5%',
       color: 'bg-yellow-500',
     },
     {
       title: 'Completion Rate',
-      value: '92%',
+      value: `${completionRate}%`,
       icon: TrendingUp,
       trend: '+3%',
       color: 'bg-purple-500',
     },
   ];
 
-  const chartData = [
-    { name: 'Mon', value: 40 },
-    { name: 'Tue', value: 65 },
-    { name: 'Wed', value: 50 },
-    { name: 'Thu', value: 75 },
-    { name: 'Fri', value: 90 },
-    { name: 'Sat', value: 85 },
-    { name: 'Sun', value: 70 },
-  ];
+  // Removed old chartData - now using dynamic data from state
 
   const pieData = [
-    { name: 'Completed', value: 68 },
-    { name: 'In Progress', value: 20 },
-    { name: 'Pending', value: 12 },
+    { name: 'Completed', value: completedTasks },
+    { name: 'In Progress', value: inProgressTasks },
+    { name: 'Pending', value: pendingTasks },
   ];
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b'];
 
-  const recentTasks = [
-    { id: 1, title: 'Design new UI', assignee: 'John Doe', status: 'In Progress', priority: 'High' },
-    { id: 2, title: 'Fix bug in login', assignee: 'Jane Smith', status: 'Completed', priority: 'Medium' },
-    { id: 3, title: 'Update database', assignee: 'Mike Johnson', status: 'Pending', priority: 'High' },
-    { id: 4, title: 'Write documentation', assignee: 'Sarah Williams', status: 'In Progress', priority: 'Low' },
-  ];
+  // const getStatusVariant = (status: string) => {
+  //   switch (status) {
+  //     case 'completed':
+  //       return 'default';
+  //     case 'in-progress':
+  //       return 'secondary';
+  //     case 'pending':
+  //       return 'outline';
+  //     default:
+  //       return 'secondary';
+  //   }
+  // };
 
-  const recentUsers = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Manager', joinDate: '2024-01-15' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Developer', joinDate: '2024-02-20' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'Designer', joinDate: '2024-03-10' },
-  ];
+  // const getPriorityVariant = (priority: string) => {
+  //   switch (priority) {
+  //     case 'high':
+  //       return 'destructive';
+  //     case 'medium':
+  //       return 'secondary';
+  //     case 'low':
+  //       return 'outline';
+  //     default:
+  //       return 'secondary';
+  //   }
+  // };
 
-  const getStatusVariant = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Completed':
-        return 'default';
-      case 'In Progress':
-        return 'secondary';
-      case 'Pending':
-        return 'outline';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'secondary';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getPriorityVariant = (priority: string) => {
+  const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'High':
-        return 'destructive';
-      case 'Medium':
-        return 'secondary';
-      case 'Low':
-        return 'outline';
+      case 'critical':
+        return 'bg-red-600 text-white font-bold shadow-lg border-2 border-red-700';
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-orange-100 text-orange-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
       default:
-        return 'secondary';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -136,133 +332,186 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <div className={`${stat.color} rounded-lg p-2 text-white`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {stat.trend} from last month
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {isLoading ? (
+          <>
+            <StatSkeleton />
+            <StatSkeleton />
+            <StatSkeleton />
+            <StatSkeleton />
+          </>
+        ) : (
+          stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                  <div className={`${stat.color} rounded-lg p-2 text-white`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    <Counter value={stat.value} duration={1500} />
+                    {stat.title === 'Completion Rate' && '%'}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {stat.trend} from last month
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Task Distribution - Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Task Distribution</CardTitle>
-            <CardDescription>Overview of task completion</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name} ${value}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <>
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </>
+        ) : (
+          <>
+            {/* Task Distribution - Pie Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Task Distribution</CardTitle>
+                <CardDescription>Overview of task completion</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name} ${value}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
 
-        {/* Performance Trend - Bar Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Trend</CardTitle>
-            <CardDescription>Weekly performance metrics</CardDescription>
-          </CardHeader>
+            {/* Performance Trend - Bar Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Trend</CardTitle>
+                <CardDescription>Tasks completed by day of week</CardDescription>
+              </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                <Tooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                          <p className="font-semibold">{data.name}</p>
+                          <p className="text-green-600">Completed: {data.completed}</p>
+                          <p className="text-gray-600">Total: {data.total}</p>
+                          <p className="text-blue-600 font-bold">Rate: {data.completionRate}%</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="completed" fill="#10b981" radius={[8, 8, 0, 0]} name="Completed" />
+                <Bar dataKey="total" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Total Tasks" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
-        </Card>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Recent Tasks & Users */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Tasks */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Recent Tasks</CardTitle>
-              <CardDescription>Latest tasks assigned</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/tasks">View All</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Assignee</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Priority</TableHead>
-                </TableRow>
+        {isLoading ? (
+          <>
+            <TableSkeleton />
+            <TableSkeleton />
+          </>
+        ) : (
+          <>
+            {/* Recent Tasks */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Recent Tasks</CardTitle>
+                  <CardDescription>Latest tasks assigned</CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/tasks">View All</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Assignee</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                    </TableRow>
               </TableHeader>
               <TableBody>
-                {recentTasks.map((task) => (
-                  <TableRow key={task.id}>
-                    <TableCell className="font-medium">{task.title}</TableCell>
-                    <TableCell className="text-sm">{task.assignee}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusVariant(task.status)}>
-                        {task.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getPriorityVariant(task.priority)}>
-                        {task.priority}
-                      </Badge>
+                {recentTasks.length > 0 ? (
+                  recentTasks.map((task) => (
+                    <TableRow key={task.id}>
+                      <TableCell className="font-medium">{task.title}</TableCell>
+                      <TableCell className="text-sm">{getAssigneeName(task.assigned_to)}</TableCell>
+                      <TableCell>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
+                          {task.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPriorityColor(task.priority)}`}>
+                          {task.priority}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
+                      No tasks found
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                </Table>
+              </CardContent>
+            </Card>
 
-        {/* Recent Users */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Recent Users</CardTitle>
-              <CardDescription>Latest team members</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/users">View All</Link>
-            </Button>
+            {/* Recent Users */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Recent Users</CardTitle>
+                  <CardDescription>Latest team members</CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/users">View All</Link>
+                </Button>
           </CardHeader>
           <CardContent>
             <Table>
@@ -275,20 +524,30 @@ export default function DashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell className="text-sm">{user.email}</TableCell>
-                    <TableCell className="text-sm">{user.role}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {user.joinDate}
+                {recentUsers.length > 0 ? (
+                  recentUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.full_name || user.name}</TableCell>
+                      <TableCell className="text-sm">{user.email}</TableCell>
+                      <TableCell className="text-sm">{user.role || 'User'}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
+                      No users found
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                </Table>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );

@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -29,8 +31,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 export default function AddUserPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [formData, setFormData] = useState({
@@ -108,15 +112,36 @@ export default function AddUserPage() {
     e.preventDefault();
 
     if (!validateForm()) {
+      toastNotifications.error.validation('Please fix all errors in the form');
       return;
     }
 
     setIsLoading(true);
+    const loadingToast = toastNotifications.info.processing('Creating user...');
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setShowSuccessDialog(true);
+    try {
+      const response = await fetch('/api/users/adduser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          full_name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          role: formData.role,
+          department: formData.department,
+          status: formData.status,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create user');
+      }
+
+      toast.dismiss(loadingToast);
+      toastNotifications.success.created(`${formData.firstName} ${formData.lastName}`);
+      
       // Reset form
       setFormData({
         firstName: '',
@@ -127,7 +152,18 @@ export default function AddUserPage() {
         department: '',
         status: 'Active',
       });
-    }, 1500);
+      
+      setTimeout(() => {
+        router.push('/admin/users');
+      }, 1500);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast.dismiss(loadingToast);
+      toastNotifications.error.createFailed('user');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   };
 
   const handleReset = () => {

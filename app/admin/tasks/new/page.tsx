@@ -4,6 +4,7 @@ import React, { useState, useEffect, ReactNode } from 'react';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -21,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { FormSkeleton } from '@/app/components/skeleton-loaders';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface TaskFormData {
   title: string;
@@ -32,6 +35,7 @@ interface TaskFormData {
 }
 
 export default function NewTaskPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
@@ -43,6 +47,7 @@ export default function NewTaskPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingAssignees, setIsLoadingAssignees] = useState(true);
   const [assignees, setAssignees] = useState<Array<{
     full_name: ReactNode; id: number; name: string 
 }>>([]);
@@ -51,12 +56,18 @@ export default function NewTaskPage() {
   useEffect(() => {
     const fetchAssignees = async () => {
       try {
+        setIsLoadingAssignees(true);
         const response = await fetch('/api/users/getusers');
+        if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
         console.log('Fetched assignees:', data);
         setAssignees(data.users || []);
       } catch (error) {
         console.error('Failed to fetch assignees:', error);
+        toastNotifications.error.fetchFailed('team members');
+        setAssignees([]);
+      } finally {
+        setIsLoadingAssignees(false);
       }
     };
     fetchAssignees();
@@ -116,10 +127,12 @@ export default function NewTaskPage() {
     e.preventDefault();
 
     if (!validateForm()) {
+      toastNotifications.error.validation('Please fill in all required fields');
       return;
     }
 
     setIsSubmitting(true);
+    const loadingToast = toastNotifications.info.processing('Creating task...');
 
     try {
       const response = await fetch('/api/tasks/addtask', {
@@ -135,7 +148,8 @@ export default function NewTaskPage() {
       }
 
       console.log('Task created:', formData);
-      toast.success('Task created successfully!');
+      toast.dismiss(loadingToast);
+      toastNotifications.success.created('Task');
       
       // Clear form data
       setFormData({
@@ -147,13 +161,38 @@ export default function NewTaskPage() {
         dueDate: '',
       });
       setErrors({});
+
+      // Redirect to tasks page after 1 second
+      setTimeout(() => {
+        router.push('/admin/tasks');
+      }, 1000);
     } catch (error) {
       console.error('Error creating task:', error);
-      toast.error('Failed to create task. Please try again.');
+      toast.dismiss(loadingToast);
+      toastNotifications.error.createFailed('task');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoadingAssignees) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/tasks">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft size={20} />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Create New Task</h1>
+            <p className="text-gray-500">Add a new task to the system</p>
+          </div>
+        </div>
+        <FormSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

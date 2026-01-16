@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 export default function AddUserPage() {
   const router = useRouter();
@@ -148,14 +149,12 @@ export default function AddUserPage() {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error('Validation failed', {
-        description: 'Please fill in all required fields correctly',
-      });
+      toastNotifications.error.validation('Please fill in all required fields correctly');
       return;
     }
 
     setIsLoading(true);
-    const loadingToast = toast.loading('Creating user...');
+    const loadingToast = toastNotifications.info.processing('Creating user...');
 
     fetch('/api/users/adduser', {
       method: 'POST',
@@ -168,12 +167,10 @@ export default function AddUserPage() {
         }
         return response.json();
       })
-      .then((data) => {
+      .then(() => {
         setIsLoading(false);
         toast.dismiss(loadingToast);
-        toast.success('User created successfully', {
-          description: `${formData.firstName} ${formData.lastName} has been added to the system`,
-        });
+        toastNotifications.success.created('User');
         setShowSuccessDialog(true);
         setFormData({
           firstName: '',
@@ -187,12 +184,10 @@ export default function AddUserPage() {
           status: 'Active',
         });
       })
-      .catch((err) => {
+      .catch(() => {
         setIsLoading(false);
         toast.dismiss(loadingToast);
-        toast.error('Failed to create user', {
-          description: err.message || 'An error occurred',
-        });
+        toastNotifications.error.createFailed('user');
       });
   };
 

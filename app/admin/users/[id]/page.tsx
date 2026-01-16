@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Mail,
   Phone,
   MapPin,
-  Calendar,
   Edit2,
   Trash2,
   MessageSquare,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -40,6 +40,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { FormSkeleton } from '@/app/components/skeleton-loaders';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface User {
   id: number;
@@ -111,16 +113,71 @@ export default function UserDetailPage() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`/api/users/getusers?id=${userId}`);
+        const result = await response.json();
+        
+        if (response.ok && result.users && result.users.length > 0) {
+          const user = result.users[0];
+          setUserData({
+            id: parseInt(userId as string),
+            name: user.full_name,
+            email: user.email,
+            phone: user.phone || '+1 (555) 123-4567',
+            department: user.department || 'Not specified',
+            role: user.role || 'Team Member',
+            status: user.status || 'active',
+            joinDate: user.created_at || new Date().toISOString(),
+            lastActive: new Date().toISOString(),
+            location: user.location || 'Not specified',
+            avatar: user.full_name.substring(0, 2).toUpperCase(),
+            bio: user.bio || '',
+          });
+        } else {
+          throw new Error('Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toastNotifications.error.fetchFailed('user details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchUserData();
+    }
+  }, [userId]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    const loadingToast = toastNotifications.info.processing('Deleting user...');
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('User deleted:', userId);
+      const response = await fetch(`/api/users/deleteuser?id=${userId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+
+      toast.dismiss(loadingToast);
+      toastNotifications.success.deleted('User');
       setDeleteDialogOpen(false);
-      // In a real app, you would redirect here
-      // redirect('/admin/users');
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        window.location.href = '/admin/users';
+      }, 1500);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.dismiss(loadingToast);
+      toastNotifications.error.deleteFailed('user');
     } finally {
       setIsDeleting(false);
     }
@@ -167,9 +224,14 @@ export default function UserDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      {/* Loading State */}
+      {isLoading && <FormSkeleton />}
+
+      {!isLoading && userData && (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
           <Link href="/admin/users">
             <Button variant="ghost" size="icon">
               <ArrowLeft size={20} />
@@ -208,7 +270,7 @@ export default function UserDetailPage() {
             <CardContent className="pt-6">
               <div className="flex gap-6">
                 {/* Avatar */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <div className="h-24 w-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-bold">
                     {user.avatar}
                   </div>
@@ -413,7 +475,7 @@ export default function UserDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
+                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5 shrink-0" />
                 <div>
                   <p className="font-medium">Last login</p>
                   <p className="text-gray-500">
@@ -423,14 +485,14 @@ export default function UserDetailPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                 <div>
                   <p className="font-medium">Last task update</p>
                   <p className="text-gray-500">2 hours ago</p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="h-2 w-2 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
+                <div className="h-2 w-2 rounded-full bg-purple-500 mt-1.5 shrink-0" />
                 <div>
                   <p className="font-medium">Profile updated</p>
                   <p className="text-gray-500">5 days ago</p>
@@ -463,6 +525,8 @@ export default function UserDetailPage() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+        </>
+      )}
     </div>
   );
 }

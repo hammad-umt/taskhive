@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Trash2, Archive, Star, Search, Filter } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Trash2, Star, Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface Message {
   id: number;
@@ -78,23 +77,18 @@ export default function InboxPage() {
   const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
 
   const toggleStar = (id: number) => {
-    const message = messages.find((msg) => msg.id === id);
     setMessages(messages.map((msg) => (msg.id === id ? { ...msg, starred: !msg.starred } : msg)));
-    if (message?.starred) {
-      toast.info('Removed from starred');
-    } else {
-      toast.success('Added to starred');
-    }
+    toastNotifications.info.generic('Starred updated');
   };
 
   const deleteMessage = (id: number) => {
-    const message = messages.find((msg) => msg.id === id);
     setMessages(messages.filter((msg) => msg.id !== id));
-    toast.success('Message deleted', { description: message?.subject });
+    toastNotifications.success.deleted('Message');
   };
 
   const markAsRead = (id: number) => {
     setMessages(messages.map((msg) => (msg.id === id ? { ...msg, read: true } : msg)));
+    toastNotifications.info.generic('Marked as read');
   };
 
   const filteredMessages = messages.filter(
@@ -109,7 +103,7 @@ export default function InboxPage() {
     <div className="p-8 max-w-5xl mx-auto">
       <Card className="overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+          <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold">Inbox</h1>
@@ -148,19 +142,19 @@ export default function InboxPage() {
               >
                 <div className="flex items-center gap-4">
                   {/* Avatar */}
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center font-bold">
+                  <div className="shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center font-bold">
                       {message.avatar}
                     </div>
                   </div>
 
                   {/* Content */}
-                  <div className="flex-grow min-w-0">
+                  <div className="grow min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className={`font-bold text-gray-900 ${!message.read ? 'text-lg' : ''}`}>
                         {message.sender}
                       </h3>
-                      <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{message.timestamp}</span>
+                      <span className="text-xs text-gray-500 shrink-0 ml-2">{message.timestamp}</span>
                     </div>
                     <p className={`text-sm ${!message.read ? 'font-bold text-gray-900' : 'text-gray-600'}`}>
                       {message.subject}
@@ -169,7 +163,7 @@ export default function InboxPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

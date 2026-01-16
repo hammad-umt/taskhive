@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -21,6 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { FormSkeleton } from '@/app/components/skeleton-loaders';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface AssignmentFormData {
   taskId: string;
@@ -46,6 +50,7 @@ interface TeamMember {
 }
 
 export default function AssignTaskPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<AssignmentFormData>({
     taskId: '',
     assignee: '',
@@ -55,6 +60,7 @@ export default function AssignTaskPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -69,6 +75,9 @@ export default function AssignTaskPage() {
         }
       } catch (error) {
         console.error('Failed to fetch tasks:', error);
+        toastNotifications.error.fetchFailed('tasks');
+      } finally {
+        setIsLoadingData(false);
       }
     };
     fetchTasks();
@@ -85,6 +94,7 @@ export default function AssignTaskPage() {
         }
       } catch (error) {
         console.error('Failed to fetch team members:', error);
+        toastNotifications.error.fetchFailed('team members');
       }
     };
     fetchTeamMembers();
@@ -158,10 +168,12 @@ export default function AssignTaskPage() {
     e.preventDefault();
 
     if (!validateForm()) {
+      toastNotifications.error.validation('Please fill in all required fields');
       return;
     }
 
     setIsSubmitting(true);
+    const loadingToast = toastNotifications.info.processing('Assigning task...');
 
     try {
       const response = await fetch('/api/tasks/assign', {
@@ -177,6 +189,9 @@ export default function AssignTaskPage() {
       }
 
       console.log('Task assigned:', formData);
+      toast.dismiss(loadingToast);
+      toastNotifications.success.updated('Task assigned successfully');
+      
       // Reset form
       setFormData({
         taskId: '',
@@ -185,8 +200,14 @@ export default function AssignTaskPage() {
         notes: '',
       });
       setSelectedTask(null);
+      
+      setTimeout(() => {
+        router.push('/admin/tasks');
+      }, 1000);
     } catch (error) {
       console.error('Error assigning task:', error);
+      toast.dismiss(loadingToast);
+      toastNotifications.error.updateFailed('task assignment');
     } finally {
       setIsSubmitting(false);
     }
@@ -241,18 +262,21 @@ export default function AssignTaskPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Form Card */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assignment Details</CardTitle>
-              <CardDescription>
-                Assign a task to a team member
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+      {isLoadingData ? (
+        <FormSkeleton />
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Form Card */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Assignment Details</CardTitle>
+                <CardDescription>
+                  Assign a task to a team member
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Select Task */}
                 <div className="space-y-2">
                   <Label htmlFor="taskId">Select Task</Label>
@@ -454,6 +478,7 @@ export default function AssignTaskPage() {
           </Card>
         </div>
       </div>
+      )}
     </div>
   );
 }

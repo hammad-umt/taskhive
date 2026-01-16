@@ -10,12 +10,10 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface SearchResult {
   id: number;
@@ -123,8 +122,15 @@ export default function SearchPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!searchQuery.trim()) {
+      toastNotifications.error.validation('Please enter a search query');
+      return;
+    }
+
     setIsSearching(true);
     setHasSearched(true);
+    const searchToast = toastNotifications.info.processing(`Searching...`);
 
     // Simulate search delay
     setTimeout(() => {
@@ -147,6 +153,14 @@ export default function SearchPage() {
 
       setResults(filtered);
       setIsSearching(false);
+      
+      // Show result notification
+      toast.dismiss(searchToast);
+      if (filtered.length === 0) {
+        toastNotifications.info.generic('No results found');
+      } else {
+        toastNotifications.info.generic(`Found ${filtered.length} result${filtered.length !== 1 ? 's' : ''}`);
+      }
     }, 500);
   };
 

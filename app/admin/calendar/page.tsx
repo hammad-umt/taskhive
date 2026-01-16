@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface CalendarEvent {
   date: number;
@@ -14,7 +14,7 @@ interface CalendarEvent {
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1));
-  const [events, setEvents] = useState<CalendarEvent[]>([
+  const [events] = useState<CalendarEvent[]>([
     { date: 5, title: 'Team Meeting', color: 'bg-blue-100' },
     { date: 12, title: 'Project Deadline', color: 'bg-red-100' },
     { date: 18, title: 'Review Session', color: 'bg-green-100' },
@@ -31,12 +31,16 @@ export default function CalendarPage() {
 
   const previousMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
-    toast.info(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1).toLocaleString('default', { month: 'long', year: 'numeric' }));
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+    const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    toastNotifications.info.generic(`Navigated to ${monthName}`);
   };
 
   const nextMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
-    toast.info(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1).toLocaleString('default', { month: 'long', year: 'numeric' }));
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+    const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    toastNotifications.info.generic(`Navigated to ${monthName}`);
   };
 
   const daysInMonth = getDaysInMonth(currentDate);
@@ -54,7 +58,7 @@ export default function CalendarPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <Card className="p-6">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-6">
+        <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-6">
           <h1 className="text-3xl font-bold mb-4">Calendar Demo</h1>
 
           {/* Month Navigation */}

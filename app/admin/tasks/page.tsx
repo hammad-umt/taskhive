@@ -38,6 +38,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { HeaderSkeleton, TableSkeleton } from '@/app/components/skeleton-loaders';
+
 
 interface Task {
   id: string;
@@ -70,18 +72,50 @@ export default function TasksPage() {
     const fetchData = async () => {
       console.log('Starting fetch data...');
       try {
-        console.log('Fetching from /api/tasks/gettask and /api/users/getusers');
-        const [tasksRes, usersRes] = await Promise.all([
-          fetch('/api/tasks/gettask'),
-          fetch('/api/users/getusers'),
-        ]);
+        let tasksRes, usersRes;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        // Retry logic for fetching
+        while (retryCount < maxRetries) {
+          try {
+            console.log(`Fetching attempt ${retryCount + 1}/${maxRetries}`);
+            [tasksRes, usersRes] = await Promise.all([
+              fetch('/api/tasks/gettask', { 
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+              }),
+              fetch('/api/users/getusers', {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+              }),
+            ]);
+            
+            if (tasksRes.ok && usersRes.ok) {
+              break; // Success, exit retry loop
+            }
+            retryCount++;
+            if (retryCount < maxRetries) {
+              console.warn(`Fetch failed, retrying... (${retryCount}/${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+            }
+          } catch (err) {
+            retryCount++;
+            if (retryCount < maxRetries) {
+              console.warn(`Fetch error, retrying... (${retryCount}/${maxRetries})`, err);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            } else {
+              throw err;
+            }
+          }
+        }
         
         console.log('Responses received');
-        console.log('Tasks Response Status:', tasksRes.status);
-        console.log('Users Response Status:', usersRes.status);
+        console.log('Tasks Response Status:', tasksRes!.status);
+        console.log('Users Response Status:', usersRes!.status);
         
-        const tasksData = await tasksRes.json();
-        const usersData = await usersRes.json();
+        const tasksData = await tasksRes!.json();
+        const usersData = await usersRes!.json();
         
         console.log('Raw Tasks Response:', tasksData);
         console.log('Raw Users Response:', usersData);
@@ -207,59 +241,66 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-          <p className="text-gray-500">Manage and track all tasks</p>
-        </div>
-        <Link href="/admin/tasks/new">
-          <Button className="gap-2">
-            <Plus size={20} />
-            New Task
-          </Button>
-        </Link>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            {/* Search */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Search tasks</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by title or description..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+      {isLoading ? (
+        <>
+          <HeaderSkeleton />
+          <TableSkeleton />
+        </>
+      ) : (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
+              <p className="text-gray-500">Manage and track all tasks</p>
             </div>
+            <Link href="/admin/tasks/new">
+              <Button className="gap-2">
+                <Plus size={20} />
+                New Task
+              </Button>
+            </Link>
+          </div>
 
-            {/* Status Filter */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Filters */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                {/* Search */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Search tasks</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search by title or description..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
 
-            {/* Priority Filter */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Priority</label>
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger>
+                {/* Status Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Priority Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Priority</label>
+                  <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                    <SelectTrigger>
                   <SelectValue placeholder="Filter by priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -388,6 +429,8 @@ export default function TasksPage() {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

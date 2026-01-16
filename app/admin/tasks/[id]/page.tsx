@@ -31,6 +31,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { FormSkeleton } from '@/app/components/skeleton-loaders';
+import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface Task {
   id: string;
@@ -101,7 +103,7 @@ export default function TaskDetailPage() {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        toast.error('Failed to load task. Please try again.');
+        toastNotifications.error.fetchFailed('task details');
       } finally {
         setIsLoading(false);
       }
@@ -114,7 +116,7 @@ export default function TaskDetailPage() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const loadingToast = toast.loading('Deleting task...');
+    const loadingToast = toastNotifications.info.processing('Deleting task...');
 
     try {
       console.log('Deleting task:', taskId);
@@ -132,7 +134,7 @@ export default function TaskDetailPage() {
 
       console.log('Task deleted successfully');
       toast.dismiss(loadingToast);
-      toast.success('Task deleted successfully!');
+      toastNotifications.success.deleted('Task');
       setDeleteDialogOpen(false);
 
       // Redirect after a short delay
@@ -142,7 +144,7 @@ export default function TaskDetailPage() {
     } catch (error) {
       console.error('Error deleting task:', error);
       toast.dismiss(loadingToast);
-      toast.error('Failed to delete task. Please try again.');
+      toastNotifications.error.deleteFailed('task');
       setIsDeleting(false);
     }
   };
@@ -182,16 +184,7 @@ export default function TaskDetailPage() {
   return (
     <div className="space-y-6">
       {/* Loading State */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center space-y-3">
-            <div className="inline-block">
-              <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            </div>
-            <p className="text-gray-600 font-medium">Loading task details...</p>
-          </div>
-        </div>
-      )}
+      {isLoading && <FormSkeleton />}
 
       {!isLoading && !task && (
         <div className="text-center py-12">
@@ -399,7 +392,7 @@ export default function TaskDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
+                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5 shrink-0" />
                 <div>
                   <p className="font-medium">Created</p>
                   <p className="text-gray-500">
@@ -409,7 +402,7 @@ export default function TaskDetailPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                 <div>
                   <p className="font-medium">In Progress</p>
                   <p className="text-gray-500">Started 3 days ago</p>
