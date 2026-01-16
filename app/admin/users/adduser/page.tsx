@@ -164,7 +164,6 @@ export default function AddUserPage() {
       setIsLoading(false);
     }
   };
-  };
 
   const handleReset = () => {
     setFormData({
