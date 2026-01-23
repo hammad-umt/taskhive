@@ -6,8 +6,6 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { id, title, description, status, priority, assignee, dueDate } = body;
 
-    console.log('Update task request:', { id, title, status, priority });
-
     if (!id) {
       return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
     }
@@ -34,20 +32,16 @@ export async function PUT(request: NextRequest) {
       .select('*');
 
     if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: 'Failed to update task' }, { status: 400 });
     }
-
-    console.log('Task updated successfully:', data);
 
     return NextResponse.json({
       message: 'Task updated successfully',
       data: data?.[0] || null,
     });
   } catch (error) {
-    console.error('Server error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

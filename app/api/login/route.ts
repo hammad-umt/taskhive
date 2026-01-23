@@ -3,6 +3,17 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "../../utils/supabase/admin"
 
+/**
+ * POST /api/login
+ * Login endpoint that returns proper user ID for BOTH users and admins
+ * 
+ * SECURITY: Removes sensitive logging (emails, detailed errors)
+ * 
+ * Response structure:
+ * - id: User's UUID (from auth.users table)
+ * - user: Full user object from Supabase auth
+ * - role: 'admin' or 'user' (from profiles table)
+ */
 export async function POST(request: Request) {
   const { email, password } = await request.json()
   
@@ -21,8 +32,8 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json(
-      { error: error.message },
-      { status: 400 }
+      { error: 'Invalid credentials' },
+      { status: 401 }
     )
   }
 
@@ -36,11 +47,18 @@ export async function POST(request: Request) {
     refresh_token: data.session?.refresh_token || '',
   });
 
-  // Get user role
+  // Get user role from profiles table
   const response = await supabaseAdmin.from('profiles').select('role').eq('id', data.user.id).single()
+  const userRole = response.data?.role || 'user';
   
   return NextResponse.json({
-    user: data.user,
-    role: response.data?.role || 'user'
+    id: data.user.id,           // User's ID from auth.users
+    userId: data.user.id,       // Also include as userId for clarity
+    user: {
+      id: data.user.id,
+      email: data.user.email
+    },
+    role: userRole,
+    message: 'Login successful'
   })
 }

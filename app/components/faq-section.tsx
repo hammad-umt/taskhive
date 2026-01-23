@@ -14,35 +14,35 @@ interface FAQSectionProps {
 const defaultFAQs: FAQData[] = [
   {
     question: 'Is TaskHive free to use?',
-    answer: 'Yes! TaskHive offers a free plan for individuals and small teams. We also have affordable Pro plans for businesses with advanced features.'
+    answer: 'Yes! TaskHive is completely free for everyone. No credit card required and no hidden fees.'
   },
   {
     question: 'How secure is my data?',
     answer: 'We use industry-leading encryption and security practices. All data is encrypted in transit and at rest, and we\'re GDPR compliant. Your privacy is our top priority.'
   },
   {
-    question: 'Can I integrate TaskHive with other tools?',
-    answer: 'Yes! TaskHive supports integrations with popular tools like Slack, Google Workspace, Microsoft Teams, and more. We also have an API for custom integrations.'
-  },
-  {
     question: 'How do I get support?',
-    answer: 'We offer 24/7 email support, live chat, and a comprehensive help center. Pro plan users get priority support with faster response times.'
+    answer: 'We offer support through email and our help center. Our team is dedicated to helping you get the most out of TaskHive.'
   },
   {
     question: 'Can I export my data?',
-    answer: 'Yes, you can export all your data at any time in various formats including CSV, JSON, and Excel. You have complete ownership of your data.'
+    answer: 'Yes, you can export all your data at any time in various formats including CSV and JSON. You have complete ownership of your data.'
   },
   {
-    question: 'Will there be paid plans in the future?',
-    answer: 'TaskHive is completely free and we plan to keep it free forever. There are no paid plans or premium versions planned.'
-  },
-  {
-    question: 'Is there a mobile app?',
-    answer: 'TaskHive is fully responsive and works great on mobile browsers. Native mobile apps for iOS and Android are coming soon.'
+    question: 'Is TaskHive responsive on mobile?',
+    answer: 'Yes! TaskHive is fully responsive and works seamlessly on mobile devices, tablets, and desktops. Access your tasks anytime, anywhere.'
   },
   {
     question: 'Can I customize workflows for my team?',
-    answer: 'Absolutely! TaskHive allows you to create custom task statuses, workflows, fields, and automation rules to match your team\'s unique processes.'
+    answer: 'Absolutely! TaskHive allows you to create custom task statuses, set priorities, assign team members, and manage all workflows to match your team\'s unique processes.'
+  },
+  {
+    question: 'How do I manage my team?',
+    answer: 'You can invite team members, assign roles (admin or user), manage permissions, and track who is working on what with real-time updates and notifications.'
+  },
+  {
+    question: 'Can I track task progress?',
+    answer: 'Yes! TaskHive provides real-time progress tracking with status indicators (Pending, In Progress, On Hold, Completed), priority levels, and detailed task views.'
   }
 ];
 

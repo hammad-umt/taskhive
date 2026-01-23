@@ -112,9 +112,9 @@ export default function NewTaskPage() {
     if (!formData.description.trim()) {
       newErrors.description = 'Task description is required';
     }
-    // if (!formData.assignee) {
-    //   newErrors.assignee = 'Please select an assignee';
-    // }
+    if (!formData.assignee) {
+      newErrors.assignee = 'Please select an assignee';
+    }
     if (!formData.dueDate) {
       newErrors.dueDate = 'Due date is required';
     }

@@ -46,11 +46,20 @@ export function LoginForm({
       const data = await response.json();
       
       if (response.ok && data.role) {
+        // Store user ID in localStorage with role-based keys
+        if (data.id) {
+          console.log('Login successful:', data.role, 'ID:', data.id);
+          localStorage.setItem('userId', data.id);
+          localStorage.setItem('userRole', data.role);
+          localStorage.setItem(`${data.role}Id`, data.id); // adminId or userId
+        }
+        
         toast.success('Login successful!');
         if (data.role === 'admin') {
-          console.log("Admin logged in");  
+          console.log("Admin logged in with ID:", data.id);  
           router.push('/admin/dashboard');
         } else {
+          console.log("User logged in with ID:", data.id);
           router.push('/user');
         }
       } else {

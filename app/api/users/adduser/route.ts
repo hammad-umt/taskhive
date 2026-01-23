@@ -81,11 +81,9 @@ export async function POST(request: Request) {
         });
 
         if (authError) {
-            console.error('Auth error:', authError);
             return new Response(
                 JSON.stringify({ 
-                    message: 'Email already exists or invalid credentials', 
-                    error: authError.message 
+                    message: 'Failed to create user', 
                 }), 
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
@@ -116,18 +114,16 @@ export async function POST(request: Request) {
         }).select();
 
         if (error) {
-            console.error('Database error:', error);
             // Try to delete the auth user if profile creation fails
             try {
                 await supabase.auth.admin.deleteUser(authData.user.id);
             } catch (deleteError) {
-                console.error('Could not delete auth user:', deleteError);
+                // Failed to delete, but continue with error response
             }
             
             return new Response(
                 JSON.stringify({ 
                     message: 'Error creating user profile', 
-                    error: error.message 
                 }), 
                 { status: 500, headers: { 'Content-Type': 'application/json' } }
             );
@@ -149,13 +145,12 @@ export async function POST(request: Request) {
         );
 
     } catch (error) {
-        console.error('Error adding user:', error);
         return new Response(
             JSON.stringify({ 
                 message: 'Error adding user', 
-                error: error instanceof Error ? error.message : String(error) 
             }), 
             { status: 500, headers: { 'Content-Type': 'application/json' } }
         );
     }
+}
 }

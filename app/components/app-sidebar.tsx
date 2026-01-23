@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Home, Inbox, Search, Settings, Users, CheckSquare, UserPlus, Plus } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Settings, Users, CheckSquare, UserPlus, Plus, Shield } from "lucide-react"
 
 import {
   Sidebar,
@@ -19,7 +19,7 @@ import LogoutButton from "./logout-button"
 // Menu items.
 const mainItems = [
   {
-    title: "Home",
+    title: "Dashboard",
     url: "/admin/dashboard",
     icon: Home,
   },
@@ -92,6 +92,15 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent className="flex flex-col h-full">
+        {/* Header */}
+        <div className="px-4 py-6 border-b flex items-center gap-2">
+          <Shield className="h-5 w-5 text-blue-600" />
+          <div>
+            <h1 className="text-lg font-bold">TaskHive</h1>
+            <p className="text-xs text-muted-foreground">Admin Panel</p>
+          </div>
+        </div>
+
         {/* Main Navigation */}
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
@@ -172,7 +181,7 @@ export function AppSidebar() {
         <div className="flex-1"></div>
 
         {/* Logout Button */}
-        <SidebarGroup>
+        <SidebarGroup className="border-t">
           <SidebarMenuButton asChild>
             <LogoutButton />
           </SidebarMenuButton>

@@ -1,24 +1,46 @@
 import { supabaseAdmin } from "@/app/utils/supabase/admin";
+import { createClient } from "@/app/utils/supabase/server";
+import { cookies } from "next/headers";
 
+/**
+ * POST /api/tasks/addtask
+ * Admin-only endpoint to create new tasks
+ * SECURITY: Validates admin role before allowing task creation
+ */
 export async function POST(request: Request) {
   try {
-    const reqBody = await request.json();
-    console.log("Received task data:", reqBody);
-    const {title, description, status, priority, assignee, dueDate} = reqBody;
+    // SECURITY: Verify admin role
+    const cookieStore = cookies();
+    const supabaseClient = createClient(cookieStore);
     
-    // Get the admin user (first user or specific admin)
-    const { data: adminUser, error: adminError } = await supabaseAdmin
-      .from('users')
-      .select('id, full_name')
-      .limit(1)
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }), 
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: profile } = await supabaseClient
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
       .single();
     
-    console.log('Admin user:', adminUser);
-
-    if (adminError || !adminUser) {
-      console.error('No admin user found');
+    if (profile?.role !== 'admin') {
       return new Response(
-        JSON.stringify({ error: 'No admin user found' }),
+        JSON.stringify({ error: "Forbidden" }), 
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const reqBody = await request.json();
+    const { title, description, status, priority, assignee, dueDate } = reqBody;
+    
+    if (!title || !assignee) {
+      return new Response(
+        JSON.stringify({ error: 'Title and assignee are required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -30,24 +52,21 @@ export async function POST(request: Request) {
       priority,
       assigned_to: assignee,
       due_date: dueDate,
-      created_by: adminUser.id,
+      created_by: user.id,
     }]);
 
     if (error) {
-      console.error('Supabase insert error:', error);
       return new Response(
         JSON.stringify({ error: 'Failed to add task' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Task created with created_by:', adminUser.id);
     return new Response(
       JSON.stringify({ message: 'Task added successfully', data }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error adding task:', error);
     return new Response(
       JSON.stringify({ error: 'Failed to add task' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

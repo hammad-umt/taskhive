@@ -34,6 +34,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
+import AdminNotifications from '@/app/components/admin-notifications';
+import { getStatusColor, getPriorityColor, getStatusLabel, getPriorityLabel } from '@/app/utils/colorUtils';
 
 // Skeleton Components
 const StatSkeleton = () => (
@@ -119,6 +121,15 @@ export default function DashboardPage() {
   const [allUsers, setAllUsers] = React.useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [chartData, setChartData] = React.useState<any[]>([]);
+  const [notifications, setNotifications] = React.useState<Array<{
+    id: string;
+    title: string;
+    description: string;
+    type: 'overdue' | 'unassigned' | 'pending' | 'urgent';
+    taskId: string;
+    priority: string;
+  }>>([]);
+  const [notificationsLoading, setNotificationsLoading] = React.useState(true);
   
   useEffect(() => {
     const fetchWithRetry = async (url: string, maxRetries = 3) => {
@@ -143,6 +154,38 @@ export default function DashboardPage() {
     const fetchData = async () => {
       const users = await fetchWithRetry('/api/users/getusers');
       const tasks = await fetchWithRetry('/api/tasks/gettask');
+      
+      // Fetch notifications and task deletions
+      try {
+        setNotificationsLoading(true);
+        const [notifRes, deletionsRes] = await Promise.all([
+          fetchWithRetry('/api/admin/notifications'),
+          fetchWithRetry('/api/admin/task-deletions'),
+        ]);
+        
+        // Combine notifications with deletion alerts
+        const allNotifications = [...(notifRes.notifications || [])];
+        
+        if (deletionsRes.deletions && deletionsRes.deletions.length > 0) {
+          deletionsRes.deletions.forEach((deletion: { id?: string; task_id: string; task_title: string; deleted_by_user_email: string; task_priority?: string }) => {
+            allNotifications.unshift({
+              id: `deletion-${deletion.id || deletion.task_id}`,
+              title: `Task Deleted: ${deletion.task_title}`,
+              description: `Deleted by ${deletion.deleted_by_user_email}`,
+              type: 'urgent',
+              taskId: deletion.task_id,
+              priority: deletion.task_priority || 'medium',
+            });
+          });
+        }
+        
+        setNotifications(allNotifications.slice(0, 10));
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+        setNotifications([]);
+      } finally {
+        setNotificationsLoading(false);
+      }
       
       console.log(tasks);
       console.log(users);
@@ -292,32 +335,14 @@ export default function DashboardPage() {
   //   }
   // };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const renderStatusBadge = (status: string) => {
+    const colors = getStatusColor(status);
+    return `${colors.bg} ${colors.text} border ${colors.border}`;
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical':
-        return 'bg-red-600 text-white font-bold shadow-lg border-2 border-red-700';
-      case 'high':
-        return 'bg-red-100 text-red-800';
-      case 'medium':
-        return 'bg-orange-100 text-orange-800';
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const renderPriorityBadge = (priority: string) => {
+    const colors = getPriorityColor(priority);
+    return `${colors.bg} ${colors.text} border ${colors.border}`;
   };
 
   return (
@@ -442,6 +467,12 @@ export default function DashboardPage() {
         )}
       </div>
 
+      {/* Task Notifications & Alerts */}
+      <AdminNotifications 
+        notifications={notifications} 
+        isLoading={notificationsLoading}
+      />
+
       {/* Recent Tasks & Users */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {isLoading ? (
@@ -479,13 +510,13 @@ export default function DashboardPage() {
                       <TableCell className="font-medium">{task.title}</TableCell>
                       <TableCell className="text-sm">{getAssigneeName(task.assigned_to)}</TableCell>
                       <TableCell>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
-                          {task.status}
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${renderStatusBadge(task.status)}`}>
+                          {getStatusLabel(task.status)}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPriorityColor(task.priority)}`}>
-                          {task.priority}
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${renderPriorityBadge(task.priority)}`}>
+                          {getPriorityLabel(task.priority)}
                         </span>
                       </TableCell>
                     </TableRow>

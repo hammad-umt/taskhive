@@ -7,7 +7,6 @@ import {
   Zap, 
   Shield, 
   BarChart3, 
-  Clock, 
   MessageSquare,
   Smartphone,
   Settings,
@@ -15,7 +14,14 @@ import {
   Award,
   Lightbulb,
   Moon,
-  Sun
+  Sun,
+  Search,
+  Bell,
+  Lock,
+  Eye,
+  Calendar,
+  Flag,
+  Layers
 } from 'lucide-react';
 import Link from 'next/link';
 import { FAQSection } from './faq-section';
@@ -146,106 +152,202 @@ export default function HomeHero() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className={`text-4xl lg:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Powerful Features for Every Team
+              Complete Task Management Solution
             </h2>
-            <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-              Everything you need to manage tasks, collaborate with your team, and achieve your goals
+            <p className={`text-xl max-w-3xl mx-auto ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+              Everything you need to organize, collaborate, and deliver. Here are the powerful features that make TaskHive the essential platform for modern teams.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className={`border p-8 rounded-lg transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-blue-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-blue-500 hover:bg-blue-50'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Feature 1: Task Management */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-blue-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-blue-500 hover:bg-blue-50'}`}>
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-blue-500/10 border-blue-500/30' : 'bg-blue-100 border-blue-300'}`}>
-                <Users size={24} className={isDark ? "text-blue-400" : "text-blue-600"} />
+                <Layers size={24} className={isDark ? "text-blue-400" : "text-blue-600"} />
               </div>
-              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Team Collaboration</h3>
-              <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-                Assign tasks, share updates, and collaborate with team members in real-time. Keep everyone synchronized and informed.
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Smart Task Management</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Create, assign, update, and manage tasks with ease. Set priorities, due dates, and track progress in real-time.
               </p>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Assign multiple team members</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Real-time notifications</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Comments & discussions</li>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Create & organize tasks</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Assign to team members</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Set deadlines & priorities</li>
               </ul>
             </div>
 
-            {/* Feature 2 */}
-            <div className={`border p-8 rounded-lg transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-yellow-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-yellow-500 hover:bg-yellow-50'}`}>
-              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-yellow-500/10 border-yellow-500/30' : 'bg-yellow-100 border-yellow-300'}`}>
-                <Zap size={24} className={isDark ? "text-yellow-400" : "text-yellow-600"} />
-              </div>
-              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Boost Productivity</h3>
-              <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-                Streamline your workflow with intuitive task management, priority levels, and deadline tracking.
-              </p>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Priority levels</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Deadline management</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Custom workflows</li>
-              </ul>
-            </div>
-
-            {/* Feature 3 */}
-            <div className={`border p-8 rounded-lg transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-green-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-green-500 hover:bg-green-50'}`}>
-              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-green-500/10 border-green-500/30' : 'bg-green-100 border-green-300'}`}>
-                <Shield size={24} className={isDark ? "text-green-400" : "text-green-600"} />
-              </div>
-              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Secure & Reliable</h3>
-              <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-                Your data is protected with enterprise-grade security and encryption standards.
-              </p>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> End-to-end encryption</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> GDPR compliant</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Regular backups</li>
-              </ul>
-            </div>
-
-            {/* Feature 4 */}
-            <div className={`border p-8 rounded-lg transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-purple-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-purple-500 hover:bg-purple-50'}`}>
+            {/* Feature 2: Admin Dashboard */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-purple-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-purple-500 hover:bg-purple-50'}`}>
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-purple-500/10 border-purple-500/30' : 'bg-purple-100 border-purple-300'}`}>
                 <BarChart3 size={24} className={isDark ? "text-purple-400" : "text-purple-600"} />
               </div>
-              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Advanced Analytics</h3>
-              <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-                Track progress with beautiful dashboards and insightful reports to measure team performance.
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Admin Dashboard & Analytics</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Comprehensive dashboard with team analytics, task completion rates, and performance metrics.
               </p>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Progress tracking</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Performance metrics</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Custom reports</li>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Team performance metrics</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Completion tracking</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Overdue task alerts</li>
               </ul>
             </div>
 
-            {/* Feature 5 */}
-            <div className={`border p-8 rounded-lg transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-pink-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-pink-500 hover:bg-pink-50'}`}>
-              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-pink-500/10 border-pink-500/30' : 'bg-pink-100 border-pink-300'}`}>
-                <Clock size={24} className={isDark ? "text-pink-400" : "text-pink-600"} />
+            {/* Feature 3: User Management */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-green-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-green-500 hover:bg-green-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-green-500/10 border-green-500/30' : 'bg-green-100 border-green-300'}`}>
+                <Users size={24} className={isDark ? "text-green-400" : "text-green-600"} />
               </div>
-              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Time Management</h3>
-              <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-                Track time spent on tasks, set deadlines, and manage project timelines effectively.
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>User Management</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Manage team members, assign roles, control access, and manage user permissions effortlessly.
               </p>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Time tracking</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Calendar view</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Deadline alerts</li>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Add team members</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Role assignment</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Access control</li>
               </ul>
             </div>
 
-            {/* Feature 6 */}
-            <div className={`border p-8 rounded-lg transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-orange-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-orange-500 hover:bg-orange-50'}`}>
+            {/* Feature 4: Advanced Search */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-yellow-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-yellow-500 hover:bg-yellow-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-yellow-500/10 border-yellow-500/30' : 'bg-yellow-100 border-yellow-300'}`}>
+                <Search size={24} className={isDark ? "text-yellow-400" : "text-yellow-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Advanced Search & Filtering</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Real-time search across all tasks with filtering by status, priority, assignee, and more.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Real-time filtering</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Multi-criteria search</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Quick task lookup</li>
+              </ul>
+            </div>
+
+            {/* Feature 5: Smart Notifications */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-red-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-red-500 hover:bg-red-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-100 border-red-300'}`}>
+                <Bell size={24} className={isDark ? "text-red-400" : "text-red-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Smart Notifications & Alerts</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Intelligent alerts for overdue tasks, unassigned work, deleted tasks, and pending items.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Overdue alerts</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Deletion logging</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Unassigned task alerts</li>
+              </ul>
+            </div>
+
+            {/* Feature 6: Role-Based Access */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-orange-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-orange-500 hover:bg-orange-50'}`}>
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-orange-500/10 border-orange-500/30' : 'bg-orange-100 border-orange-300'}`}>
-                <Settings size={24} className={isDark ? "text-orange-400" : "text-orange-600"} />
+                <Lock size={24} className={isDark ? "text-orange-400" : "text-orange-600"} />
               </div>
-              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Customizable & Flexible</h3>
-              <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-                Tailor TaskHive to match your unique workflow and business processes.
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Role-Based Access Control</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Secure admin and user roles with granular permissions and restricted access levels.
               </p>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Custom fields</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> Automation rules</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400"/> API access</li>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Admin privileges</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> User permissions</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Secure access</li>
+              </ul>
+            </div>
+
+            {/* Feature 7: Password Security */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-cyan-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-cyan-500 hover:bg-cyan-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-cyan-100 border-cyan-300'}`}>
+                <Shield size={24} className={isDark ? "text-cyan-400" : "text-cyan-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Password & Security Management</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Change passwords securely with verification, maintain account security and privacy.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Old password verification</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Secure password change</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Account protection</li>
+              </ul>
+            </div>
+
+            {/* Feature 8: Task Details View */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-pink-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-pink-500 hover:bg-pink-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-pink-500/10 border-pink-500/30' : 'bg-pink-100 border-pink-300'}`}>
+                <Eye size={24} className={isDark ? "text-pink-400" : "text-pink-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Detailed Task Views</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Comprehensive task details with full information, status updates, and action buttons.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Full task info</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Status dropdown</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Edit capabilities</li>
+              </ul>
+            </div>
+
+            {/* Feature 9: Calendar View */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-indigo-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-indigo-500 hover:bg-indigo-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-indigo-100 border-indigo-300'}`}>
+                <Calendar size={24} className={isDark ? "text-indigo-400" : "text-indigo-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Calendar View</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Visualize tasks on a calendar to see schedules and plan deadlines effectively.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Visual task scheduling</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Deadline visualization</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Planning & coordination</li>
+              </ul>
+            </div>
+
+            {/* Feature 10: Status Tracking */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-green-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-green-500 hover:bg-green-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-green-500/10 border-green-500/30' : 'bg-green-100 border-green-300'}`}>
+                <CheckCircle size={24} className={isDark ? "text-green-400" : "text-green-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Status Tracking</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Track task statuses with color-coded badges: Pending, In Progress, On Hold, Completed.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Color-coded status</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Progress visibility</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Workflow management</li>
+              </ul>
+            </div>
+
+            {/* Feature 11: Priority Management */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-red-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-red-500 hover:bg-red-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-100 border-red-300'}`}>
+                <Flag size={24} className={isDark ? "text-red-400" : "text-red-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Priority Management</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Organize tasks by priority levels (High, Medium, Low) with visual indicators.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> High priority alerts</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Color-coded priorities</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Focus important work</li>
+              </ul>
+            </div>
+
+            {/* Feature 12: Responsive Design */}
+            <div className={`border rounded-xl p-6 transition duration-300 ${isDark ? 'bg-slate-700/50 border-slate-600 hover:border-teal-500/50 hover:bg-slate-700' : 'bg-white border-gray-200 hover:border-teal-500 hover:bg-teal-50'}`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg border mb-4 ${isDark ? 'bg-teal-500/10 border-teal-500/30' : 'bg-teal-100 border-teal-300'}`}>
+                <Smartphone size={24} className={isDark ? "text-teal-400" : "text-teal-600"} />
+              </div>
+              <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Responsive Design</h3>
+              <p className={`text-sm mb-4 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                Works seamlessly on desktop, tablet, and mobile devices for access anywhere.
+              </p>
+              <ul className={`space-y-1 text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Mobile friendly</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Touch optimized</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-400" /> Full functionality</li>
               </ul>
             </div>
           </div>
@@ -354,27 +456,6 @@ export default function HomeHero() {
         </div>
       </div>
 
-      {/* Trust & Social Proof Section */}
-      <div className={`border-y py-16 ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-100 border-gray-300'}`}>
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h3 className={`text-xl font-semibold mb-8 ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>Trusted by leading companies and teams</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center opacity-50">
-            <div className={`h-12 rounded-lg flex items-center justify-center ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-gray-300 text-gray-600'}`}>
-              Company A
-            </div>
-            <div className={`h-12 rounded-lg flex items-center justify-center ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-gray-300 text-gray-600'}`}>
-              Company B
-            </div>
-            <div className={`h-12 rounded-lg flex items-center justify-center ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-gray-300 text-gray-600'}`}>
-              Company C
-            </div>
-            <div className={`h-12 rounded-lg flex items-center justify-center ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-gray-300 text-gray-600'}`}>
-              Company D
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* FAQ Section */}
       <FAQSection isDark={isDark} />
 
@@ -402,78 +483,15 @@ export default function HomeHero() {
       {/* Footer */}
       <footer className={`border-t py-12 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-gray-900 border-gray-700'}`}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Zap size={24} className={isDark ? "text-blue-400" : "text-blue-300"} />
-                <h3 className="text-white font-bold text-lg">TaskHive</h3>
-              </div>
-              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-400'}`}>Making task management simple, effective, and accessible for everyone.</p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Product</h4>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-400'}`}>
-                <li><a href="#features" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Features</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Pricing</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Security</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Updates</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-400'}`}>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>About Us</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Blog</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Careers</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Resources</h4>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-400'}`}>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Help Center</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Documentation</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>API Docs</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Community</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
-              <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-gray-400'}`}>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Privacy Policy</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Terms of Service</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Cookie Policy</a></li>
-                <li><a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>GDPR</a></li>
-              </ul>
-            </div>
+          <div className="max-w-2xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Zap size={28} className={isDark ? "text-blue-400" : "text-blue-300"} />
+            <h3 className="text-white font-bold text-xl">TaskHive</h3>
           </div>
-          
-          {/* Newsletter Section */}
-          <div className={`border-t pt-12 mb-12 ${isDark ? 'border-slate-700' : 'border-gray-700'}`}>
-            <div className="max-w-md">
-              <h4 className="text-white font-semibold mb-4">Subscribe to our newsletter</h4>
-              <p className={`mb-4 text-sm ${isDark ? 'text-slate-400' : 'text-gray-400'}`}>Get the latest updates and productivity tips delivered to your inbox.</p>
-              <div className="flex gap-2">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email" 
-                  className={`flex-1 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 ${isDark ? 'bg-slate-800 border border-slate-600 text-white placeholder-slate-400 focus:border-blue-500' : 'bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'}`}
-                />
-                <button className={`px-6 py-2 rounded-lg font-semibold transition ${isDark ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
-                  Subscribe
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className={`border-t pt-8 flex flex-col sm:flex-row justify-between items-center text-sm ${isDark ? 'border-slate-700 text-slate-400' : 'border-gray-700 text-gray-400'}`}>
+          <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-400'}`}>Making task management simple, effective, and accessible for everyone.</p>
+        </div>
+          <div className={`border-t pt-8 text-center text-sm ${isDark ? 'border-slate-700 text-slate-400' : 'border-gray-700 text-gray-400'}`}>
             <p>&copy; 2026 TaskHive. All rights reserved.</p>
-            <div className="flex gap-6 mt-4 sm:mt-0">
-              <a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Twitter</a>
-              <a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>LinkedIn</a>
-              <a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>GitHub</a>
-              <a href="#" className={`${isDark ? 'hover:text-white' : 'hover:text-gray-200'} transition`}>Discord</a>
-            </div>
           </div>
         </div>
       </footer>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Eye, Calendar, User } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Eye, Calendar, User, X } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import {
@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+
 import {
   Select,
   SelectContent,
@@ -39,6 +39,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { HeaderSkeleton, TableSkeleton } from '@/app/components/skeleton-loaders';
+import { getStatusColor, getPriorityColor, getStatusLabel, getPriorityLabel } from '@/app/utils/colorUtils';
 
 
 interface Task {
@@ -168,33 +169,25 @@ export default function TasksPage() {
   }, [tasks, filteredTasks]);
 
   // Status badge color
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const renderStatusBadge = (status: string) => {
+    const colors = getStatusColor(status);
+    const label = getStatusLabel(status);
+    return (
+      <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${colors.bg} ${colors.text} border ${colors.border}`}>
+        {label}
+      </div>
+    );
   };
 
   // Priority badge color
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical':
-        return 'bg-red-100 text-red-800';
-      case 'high':
-        return 'bg-orange-100 text-orange-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const renderPriorityBadge = (priority: string) => {
+    const colors = getPriorityColor(priority);
+    const label = getPriorityLabel(priority);
+    return (
+      <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${colors.bg} ${colors.text} border ${colors.border}`}>
+        {label}
+      </div>
+    );
   };
 
   const handleDelete = (taskId: string) => {
@@ -275,8 +268,16 @@ export default function TasksPage() {
                       placeholder="Search by title or description..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-10"
                     />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -359,20 +360,10 @@ export default function TasksPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className={getStatusColor(task.status)}
-                          >
-                            {task.status.replace('-', ' ')}
-                          </Badge>
+                          {renderStatusBadge(task.status)}
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className={getPriorityColor(task.priority)}
-                          >
-                            {task.priority}
-                          </Badge>
+                          {renderPriorityBadge(task.priority)}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
