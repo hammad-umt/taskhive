@@ -214,7 +214,7 @@ export default function AssignTaskPage() {
   };
 
   const getAssignee = () => {
-    return teamMembers.find((m) => m.full_name === formData.assignee);
+    return teamMembers.find((m) => m.id === formData.assignee);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -343,7 +343,7 @@ export default function AssignTaskPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {teamMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.full_name}>
+                        <SelectItem key={member.id} value={member.id}>
                           <div className="flex items-center gap-2">
                             {member.full_name} • {member.department}
                           </div>

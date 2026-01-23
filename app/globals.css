@@ -125,5 +125,10 @@
   body {
     /* stylelint-disable-next-line */
     @apply bg-background text-foreground;
+    scrollbar-gutter: stable;
+  }
+  /* Reserve space for scrollbar on containers to prevent layout shift */
+  main {
+    scrollbar-gutter: stable;
   }
 }
