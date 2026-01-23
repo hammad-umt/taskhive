@@ -1,14 +1,8 @@
 'use client';
 
 import { 
-  Slack, 
   Mail, 
-  MessageSquare, 
-  FileJson, 
-  Cloud,
   Globe,
-  Users,
-  Zap
 } from 'lucide-react';
 
 interface SupportSectionProps {
@@ -16,15 +10,9 @@ interface SupportSectionProps {
 }
 
 export function SupportSection({ isDark = true }: SupportSectionProps) {
-  const integrations = [
-    { icon: Slack, name: 'Slack', desc: 'Receive notifications in Slack' },
-    { icon: Mail, name: 'Email', desc: 'Email notifications & reports' },
-    { icon: MessageSquare, name: 'Live Chat', desc: '24/7 live customer support' },
-    { icon: FileJson, name: 'API', desc: 'REST API for integrations' },
-    { icon: Cloud, name: 'Cloud Storage', desc: 'Google Drive & Dropbox sync' },
-    { icon: Globe, name: 'Web Access', desc: 'Access from any browser' },
-    { icon: Users, name: 'Team Management', desc: 'Unlimited team members' },
-    { icon: Zap, name: 'Webhooks', desc: 'Real-time data sync' }
+  const features = [
+    { icon: Mail, name: 'Email Support', desc: 'Get help via email' },
+    { icon: Globe, name: 'Web Access', desc: 'Access from any browser' }
   ];
 
   return (
@@ -32,15 +20,15 @@ export function SupportSection({ isDark = true }: SupportSectionProps) {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className={`text-4xl lg:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            What TaskHive Supports
+            Support & Access
           </h2>
           <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-            Seamless integrations and comprehensive support options for your team
+            TaskHive is designed to be simple and accessible for everyone
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {integrations.map((item, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+          {features.map((item, index) => (
             <div 
               key={index} 
               className={`border p-6 rounded-lg transition duration-300 ${
@@ -71,9 +59,9 @@ export function SupportSection({ isDark = true }: SupportSectionProps) {
             ? 'bg-blue-600/10 border-blue-500/30'
             : 'bg-blue-100 border-blue-300'
         }`}>
-          <h3 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Community Driven</h3>
+          <h3 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Completely Free</h3>
           <p className={isDark ? 'text-slate-300' : 'text-gray-700'}>
-            TaskHive is completely free and open to everyone. We&apos;re committed to providing a feature-rich platform 
+            TaskHive is completely free for everyone. We&apos;re committed to providing a feature-rich platform 
             that works for individuals, small teams, and growing organizations without any cost, limitations, or paywalls.
           </p>
         </div>
