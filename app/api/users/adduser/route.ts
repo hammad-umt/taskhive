@@ -129,6 +129,31 @@ export async function POST(request: Request) {
             );
         }
 
+        // Insert into profiles table with foreign key reference to users
+        const { data: profileData, error: profileError } = await supabase.from('profiles').insert({
+            uuid: authData.user.id, // Foreign key to users table
+            name: `${firstName} ${lastName}`,
+            role: role?.toLowerCase() || 'user',
+            created_at: new Date().toISOString(),
+        }).select();
+
+        if (profileError) {
+            // Try to delete the user and auth user if profile creation fails
+            try {
+                await supabase.from('users').delete().eq('id', authData.user.id);
+                await supabase.auth.admin.deleteUser(authData.user.id);
+            } catch (deleteError) {
+                // Failed to delete, but continue with error response
+            }
+            
+            return new Response(
+                JSON.stringify({ 
+                    message: 'Error creating user profile record', 
+                }), 
+                { status: 500, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
         return new Response(
             JSON.stringify({ 
                 message: 'User added successfully', 
