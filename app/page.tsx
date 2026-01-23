@@ -1,7 +1,5 @@
-'use client';
-import { useRouter } from "next/navigation";
+import HomeHero from './components/home-hero';
 
 export default function Home() {
-  const router = useRouter();
-  router.push('/login');
+  return <HomeHero />;
 }
