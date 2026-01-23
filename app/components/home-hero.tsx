@@ -411,7 +411,7 @@ export default function HomeHero() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
               { icon: Lightbulb, title: 'Easy-to-Use Interface', desc: 'Intuitive design for quick adoption with minimal learning curve' },
-              { icon: MessageSquare, title: 'Real-Time Collaboration', desc: 'Instant notifications and updates keep your team connected' },
+              { icon: MessageSquare, title: 'Team Coordination', desc: 'Assign tasks, track progress, and keep your team organized' },
               { icon: Settings, title: 'Customizable Workflows', desc: 'Adapt TaskHive to your unique business processes' },
               { icon: TrendingUp, title: 'Beautiful Analytics', desc: 'Track progress and measure team performance effectively' },
               { icon: Smartphone, title: 'Mobile Responsive', desc: 'Access TaskHive on any device, anytime, anywhere' },
