@@ -16,17 +16,14 @@ export default function LogoutButton() {
       
       if (response.ok) {
         toast.success('Logged out successfully!');
-        console.log('Logged out successfully');
         // Redirect to login page after a brief delay
         setTimeout(() => {
           window.location.href = '/login';
         }, 500);
       } else {
         toast.error('Logout failed. Please try again.');
-        console.error('Logout failed');
       }
-    } catch (error) {
-      console.error('An error occurred during logout:', error);
+    } catch {
       toast.error('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);

@@ -68,24 +68,7 @@ interface Task {
 
 export default function UserDetailPage() {
   const params = useParams();
-  const userId = params.id;
-
-  // Sample user data - in a real app, fetch this from API
-  const user: User = {
-    id: parseInt(userId as string),
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1 (555) 123-4567',
-    department: 'Backend Development',
-    role: 'Senior Developer',
-    status: 'active',
-    joinDate: '2024-03-15',
-    lastActive: '2026-01-15',
-    location: 'San Francisco, CA',
-    avatar: 'JD',
-    bio: 'Passionate backend developer with 8+ years of experience in building scalable applications.',
-  };
-
+  const userId = Array.isArray(params.id) ? params.id[0] : params.id;
   // Sample tasks assigned to user
   const userTasks: Task[] = [
     {
@@ -119,13 +102,13 @@ export default function UserDetailPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`/api/users/getusers?id=${userId}`);
+        const response = await fetch(`/api/users/getusers?id=${encodeURIComponent(userId as string)}`);
         const result = await response.json();
         
-        if (response.ok && result.users && result.users.length > 0) {
-          const user = result.users[0];
+        if (response.ok && result.user) {
+          const user = result.user;
           setUserData({
-            id: parseInt(userId as string),
+            id: Number(user.id),
             name: user.full_name,
             email: user.email,
             phone: user.phone || '+1 (555) 123-4567',
@@ -153,6 +136,8 @@ export default function UserDetailPage() {
       fetchUserData();
     }
   }, [userId]);
+
+  const user = userData;
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -245,7 +230,7 @@ export default function UserDetailPage() {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Link href={`/admin/users/${userId}/edit`}>
+              <Link href={`/admin/users/edituser/${userId}`}>
             <Button variant="outline" className="gap-2">
               <Edit2 size={18} />
               Edit
@@ -272,7 +257,7 @@ export default function UserDetailPage() {
                 {/* Avatar */}
                 <div className="shrink-0">
                   <div className="h-24 w-24 rounded-full bg-indigo-500 flex items-center justify-center text-white text-3xl font-bold">
-                    {user.avatar}
+                    {user?.avatar}
                   </div>
                 </div>
 
@@ -280,36 +265,36 @@ export default function UserDetailPage() {
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h2 className="text-2xl font-bold">{user.name}</h2>
-                      <p className="text-gray-600">{user.role}</p>
+                      <h2 className="text-2xl font-bold">{user?.name}</h2>
+                      <p className="text-gray-600">{user?.role}</p>
                     </div>
                     <Badge
                       variant="secondary"
-                      className={getStatusColor(user.status)}
+                      className={getStatusColor(user?.status || '')}
                     >
-                      {user.status}
+                      {user?.status}
                     </Badge>
                   </div>
 
                   <div className="grid gap-3 text-sm">
                     <div className="flex items-center gap-2 text-gray-600">
                       <Mail size={16} />
-                      <span>{user.email}</span>
+                      <span>{user?.email}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <Phone size={16} />
-                      <span>{user.phone}</span>
+                      <span>{user?.phone}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <MapPin size={16} />
-                      <span>{user.location}</span>
+                      <span>{user?.location}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 pt-6 border-t">
-                <p className="text-gray-700">{user.bio}</p>
+                <p className="text-gray-700">{user?.bio}</p>
               </div>
             </CardContent>
           </Card>
@@ -323,22 +308,22 @@ export default function UserDetailPage() {
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Department</p>
-                  <p className="font-semibold">{user.department}</p>
+                  <p className="font-semibold">{user?.department}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Role</p>
-                  <p className="font-semibold">{user.role}</p>
+                  <p className="font-semibold">{user?.role}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Joined</p>
                   <p className="font-semibold">
-                    {new Date(user.joinDate).toLocaleDateString()}
+                    {new Date(user?.joinDate || '').toLocaleDateString()}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Last Active</p>
                   <p className="font-semibold">
-                    {new Date(user.lastActive).toLocaleDateString()}
+                    {new Date(user?.lastActive || '').toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -448,9 +433,9 @@ export default function UserDetailPage() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Current Status</p>
                 <Badge
-                  className={`${getStatusColor(user.status)} capitalize`}
+                  className={`${getStatusColor(user?.status || '')} capitalize`}
                 >
-                  {user.status}
+                  {user?.status}
                 </Badge>
               </div>
               <div className="border-t pt-4">
@@ -479,8 +464,8 @@ export default function UserDetailPage() {
                 <div>
                   <p className="font-medium">Last login</p>
                   <p className="text-gray-500">
-                    {new Date(user.lastActive).toLocaleDateString()} at{' '}
-                    {new Date(user.lastActive).toLocaleTimeString()}
+                    {new Date(user?.lastActive || '').toLocaleDateString()} at{' '}
+                    {new Date(user?.lastActive || '').toLocaleTimeString()}
                   </p>
                 </div>
               </div>
@@ -509,7 +494,7 @@ export default function UserDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete User</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {user.name}? This action cannot be
+              Are you sure you want to delete {user?.name || 'this user'}? This action cannot be
               undone and all associated data will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -26,8 +26,7 @@ export default function ProtectedPage({ children }: ProtectedPageProps) {
         } else {
           setIsAuthenticated(true);
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
+      } catch {
         router.push('/login');
         setIsAuthenticated(false);
       } finally {

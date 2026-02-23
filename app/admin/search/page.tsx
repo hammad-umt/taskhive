@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Search,
   Clock,
@@ -28,7 +28,7 @@ import {
 import { toastNotifications } from '@/app/utils/toast-notifications';
 
 interface SearchResult {
-  id: number;
+  id: string | number;
   type: 'task' | 'user' | 'document';
   title: string;
   description: string;
@@ -40,128 +40,116 @@ interface SearchResult {
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('all');
+  const [allResults, setAllResults] = useState<SearchResult[]>([]);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   // Sample search data
-  const allResults: SearchResult[] = [
-    {
-      id: 1,
-      type: 'task',
-      title: 'Complete project documentation',
-      description: 'Write comprehensive docs for the API including endpoint documentation',
-      metadata: 'High Priority • In Progress',
-      date: '2026-01-10',
-      link: '/admin/tasks/1',
-    },
-    {
-      id: 2,
-      type: 'task',
-      title: 'Fix login bug',
-      description: 'Session timeout not working properly in production environment',
-      metadata: 'Critical Priority • Pending',
-      date: '2026-01-12',
-      link: '/admin/tasks/2',
-    },
-    {
-      id: 3,
-      type: 'user',
-      title: 'John Doe',
-      description: 'Backend Developer',
-      metadata: 'john@example.com • Active',
-      date: '2026-01-08',
-      link: '/admin/users/1',
-    },
-    {
-      id: 4,
-      type: 'task',
-      title: 'Database optimization',
-      description: 'Optimize slow running queries in user management module',
-      metadata: 'High Priority • In Progress',
-      date: '2026-01-11',
-      link: '/admin/tasks/4',
-    },
-    {
-      id: 5,
-      type: 'user',
-      title: 'Jane Smith',
-      description: 'Frontend Developer',
-      metadata: 'jane@example.com • Active',
-      date: '2026-01-05',
-      link: '/admin/users/2',
-    },
-    {
-      id: 6,
-      type: 'task',
-      title: 'User feedback implementation',
-      description: 'Add new features based on user feedback collected last month',
-      metadata: 'Low Priority • Pending',
-      date: '2026-01-09',
-      link: '/admin/tasks/5',
-    },
-    {
-      id: 7,
-      type: 'document',
-      title: 'API Documentation',
-      description: 'Complete API reference guide and usage examples',
-      metadata: 'Documentation • Updated 2 days ago',
-      date: '2026-01-13',
-      link: '/admin/docs/api',
-    },
-    {
-      id: 8,
-      type: 'user',
-      title: 'Mike Johnson',
-      description: 'Design Lead',
-      metadata: 'mike@example.com • Active',
-      date: '2026-01-03',
-      link: '/admin/users/3',
-    },
-  ];
+  useEffect(() => {
+    const allResults = async () => {
+      try {
+        const tasksResponse = await fetch('/api/tasks/gettask');
+        const usersResponse = await fetch('/api/users/getusers');
+        const taskData = await tasksResponse.json();
+        const userData = await usersResponse.json();
+
+        const mappedTasks: SearchResult[] = (taskData?.data ?? []).map((task: {
+          id: string | number;
+          title?: string;
+          description?: string;
+          status?: string;
+          created_at?: string;
+        }) => ({
+          id: task.id,
+          type: 'task',
+          title: task.title ?? 'Untitled Task',
+          description: task.description ?? 'No description',
+          metadata: task.status ?? 'pending',
+          date: task.created_at ?? new Date().toISOString(),
+          link: `/admin/tasks/${task.id}`,
+        }));
+
+        const mappedUsers: SearchResult[] = (userData?.users ?? []).map((user: {
+          id: string | number;
+          name?: string;
+          email?: string;
+          role?: string;
+          created_at?: string;
+        }) => ({
+          id: user.id,
+          type: 'user',
+          title: user.name ?? user.email ?? 'Unnamed User',
+          description: user.email ?? 'No email',
+          metadata: user.role ?? 'user',
+          date: user.created_at ?? new Date().toISOString(),
+          link: `/admin/users/${user.id}`,
+        }));
+
+        setAllResults([...mappedTasks, ...mappedUsers]);
+      } catch (error) {
+        console.error('Error fetching all results:', error);
+        toastNotifications.error.fetchFailed('search results');
+      }
+    };
+
+    allResults();
+  }, []);
+
+  const runSearch = (queryText: string, type: string) => {
+    let filtered = allResults;
+
+    const query = queryText.trim().toLowerCase();
+    if (query) {
+      filtered = filtered.filter(
+        (result) =>
+          result.title.toLowerCase().includes(query) ||
+          result.description.toLowerCase().includes(query)
+      );
+    }
+
+    if (type !== 'all') {
+      filtered = filtered.filter((result) => result.type === type);
+    }
+
+    setResults(filtered);
+  };
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+
+    if (!query) {
+      setResults([]);
+      setHasSearched(false);
+      setIsSearching(false);
+      return;
+    }
+
+    setHasSearched(true);
+    setIsSearching(true);
+
+    const timer = window.setTimeout(() => {
+      runSearch(query, searchType);
+      setIsSearching(false);
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [searchQuery, searchType, allResults]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!searchQuery.trim()) {
+
+    const query = searchQuery.trim();
+    if (!query) {
       toastNotifications.error.validation('Please enter a search query');
       return;
     }
 
-    setIsSearching(true);
     setHasSearched(true);
-    const searchToast = toastNotifications.info.processing(`Searching...`);
-
-    // Simulate search delay
-    setTimeout(() => {
-      let filtered = allResults;
-
-      // Filter by search query
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (result) =>
-            result.title.toLowerCase().includes(query) ||
-            result.description.toLowerCase().includes(query)
-        );
-      }
-
-      // Filter by type
-      if (searchType !== 'all') {
-        filtered = filtered.filter((result) => result.type === searchType);
-      }
-
-      setResults(filtered);
-      setIsSearching(false);
-      
-      // Show result notification
-      toast.dismiss(searchToast);
-      if (filtered.length === 0) {
-        toastNotifications.info.generic('No results found');
-      } else {
-        toastNotifications.info.generic(`Found ${filtered.length} result${filtered.length !== 1 ? 's' : ''}`);
-      }
-    }, 500);
+    setIsSearching(false);
+    runSearch(query, searchType);
   };
 
   const handleClear = () => {
@@ -271,12 +259,12 @@ export default function SearchPage() {
             {results.length > 0 ? (
               <p className="text-sm text-gray-600">
                 Found <span className="font-semibold">{results.length}</span>{' '}
-                result{results.length !== 1 ? 's' : ''} for 
+                result{results.length !== 1 ? 's' : ''} for{' '}
                 <span className="font-semibold">{searchQuery}</span>
               </p>
             ) : (
               <p className="text-sm text-gray-600">
-                No results found for 
+                No results found for{' '}
                 <span className="font-semibold">{searchQuery}</span>
               </p>
             )}

@@ -541,7 +541,7 @@ export default function DashboardPage() {
                   <CardDescription>Latest team members</CardDescription>
                 </div>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/users">View All</Link>
+                  <Link href="/admin/users">View All</Link>
                 </Button>
           </CardHeader>
           <CardContent>

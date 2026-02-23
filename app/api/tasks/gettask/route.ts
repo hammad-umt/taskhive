@@ -37,9 +37,9 @@ export async function GET() {
       );
     }
 
-    // Fetch user profile to verify role
+    // Fetch user role to verify admin access
     const { data: profile, error: profileError } = await supabaseClient
-      .from("profiles")
+      .from("users")
       .select("role")
       .eq("id", user.id)
       .single();

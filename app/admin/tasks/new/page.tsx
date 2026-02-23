@@ -112,9 +112,9 @@ export default function NewTaskPage() {
     if (!formData.description.trim()) {
       newErrors.description = 'Task description is required';
     }
-    if (!formData.assignee) {
-      newErrors.assignee = 'Please select an assignee';
-    }
+    // if (!formData.assignee) {
+    //   newErrors.assignee = 'Please select an assignee';
+    // }
     if (!formData.dueDate) {
       newErrors.dueDate = 'Due date is required';
     }
@@ -300,7 +300,7 @@ export default function NewTaskPage() {
 
             {/* Assignee */}
             <div className="space-y-2">
-              <Label htmlFor="assignee">Assign To</Label>
+              <Label htmlFor="assignee">Assign To (Optional)</Label>
               <Select
                 value={formData.assignee}
                 onValueChange={(value) =>
@@ -308,7 +308,7 @@ export default function NewTaskPage() {
                 }
               >
                 <SelectTrigger id="assignee">
-                  <SelectValue placeholder="Select an assignee" />
+                  <SelectValue placeholder="Leave unassigned or select a user" />
                 </SelectTrigger>
                 <SelectContent>
                   {assignees.map((assignee) => (

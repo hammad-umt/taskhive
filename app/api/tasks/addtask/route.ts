@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     const { data: profile } = await supabaseClient
-      .from("profiles")
+      .from("users")
       .select("role")
       .eq("id", user.id)
       .single();
@@ -38,26 +38,31 @@ export async function POST(request: Request) {
     const reqBody = await request.json();
     const { title, description, status, priority, assignee, dueDate } = reqBody;
     
-    if (!title || !assignee) {
+    if (!title) {
       return new Response(
-        JSON.stringify({ error: 'Title and assignee are required' }),
+        JSON.stringify({ error: 'Title is required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    const normalizedAssignee =
+      typeof assignee === 'string' && assignee.trim().length > 0 ? assignee : null;
+    const normalizedDueDate =
+      typeof dueDate === 'string' && dueDate.trim().length > 0 ? dueDate : null;
 
     const { data, error } = await supabaseAdmin.from('tasks').insert([{
       title,
       description,
       status,
       priority,
-      assigned_to: assignee,
-      due_date: dueDate,
+      assigned_to: normalizedAssignee,
+      due_date: normalizedDueDate,
       created_by: user.id,
     }]);
 
     if (error) {
       return new Response(
-        JSON.stringify({ error: 'Failed to add task' }),
+        JSON.stringify({ error: 'Failed to add task', details: error.message }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -67,6 +72,7 @@ export async function POST(request: Request) {
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
+    console.error('Error adding task:', error);
     return new Response(
       JSON.stringify({ error: 'Failed to add task' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

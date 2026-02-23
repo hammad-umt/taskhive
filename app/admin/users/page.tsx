@@ -304,7 +304,7 @@ export default function UsersPage() {
                             asChild
                             title="Edit user"
                           >
-                            <Link href={`/admin/users/${user.id}/edit`}>
+                            <Link href={`/admin/users/edituser/${user.id}`}>
                               <Edit2 className="h-4 w-4" />
                             </Link>
                           </Button>

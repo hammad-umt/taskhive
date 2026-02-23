@@ -48,7 +48,6 @@ export function LoginForm({
       if (response.ok && data.role) {
         // Store user ID in localStorage with role-based keys
         if (data.id) {
-          console.log('Login successful:', data.role, 'ID:', data.id);
           localStorage.setItem('userId', data.id);
           localStorage.setItem('userRole', data.role);
           localStorage.setItem(`${data.role}Id`, data.id); // adminId or userId
@@ -56,17 +55,14 @@ export function LoginForm({
         
         toast.success('Login successful!');
         if (data.role === 'admin') {
-          console.log("Admin logged in with ID:", data.id);  
           router.push('/admin/dashboard');
         } else {
-          console.log("User logged in with ID:", data.id);
           router.push('/user');
         }
       } else {
         toast.error(data.message || 'Login failed. Please try again.');
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch {
       toast.error('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
